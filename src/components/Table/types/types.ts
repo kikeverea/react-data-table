@@ -6,6 +6,8 @@ export type TableFilter = {
   [column: string]: string | { min?: number | string, max?: number | string, parser?: (value: string) => number }
 }
 
+export type TableSort = readonly [string, ('asc' | 'desc')]
+
 export type TableColumn<T extends Entity> = {
   name: string,
   data: (item: T) => ReactNode

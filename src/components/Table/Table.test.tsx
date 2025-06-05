@@ -1,6 +1,8 @@
 import { render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import Table from './Table.tsx'
 import { TableColumn } from './types/types.ts'
+
 import { parse } from 'date-fns'
 
 type TestData = {
@@ -50,17 +52,21 @@ describe('Table', () => {
     }
   }
 
+  const getNameCellsContent = (rows: HTMLElement[]) => {
+    return rows.map(row => within(row).getAllByRole('cell')[0].textContent)
+  }
+
   describe('Without data', () => {
     test('renders header', () => {
       render(<Table collection={ [] } columns={ columns } />)
 
       const headerCells = screen.getAllByRole('columnheader')
 
-      headerCells[0].textContent = 'Name'
-      headerCells[1].textContent = 'Family'
-      headerCells[2].textContent = 'Type'
-      headerCells[3].textContent = 'Age'
-      headerCells[4].textContent = 'Birth'
+      expect(headerCells[0].textContent).toBe('Name')
+      expect(headerCells[1].textContent).toBe('Family')
+      expect(headerCells[2].textContent).toBe('Type')
+      expect(headerCells[3].textContent).toBe('Age')
+      expect(headerCells[4].textContent).toBe('Birth')
     })
 
     test('renders empty message', () => {
@@ -79,6 +85,7 @@ describe('Table', () => {
   })
 
   describe('With data', () => {
+
     test('renders collection', () => {
       render(<Table collection={ collection } columns={ columns }/>)
 
@@ -192,6 +199,7 @@ describe('Table', () => {
       expect(lionCells[0].textContent).toBe('Lion')
     })
 
+
     test('renders rows that pass the range filter, edge cases', () => {
       render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 10, max: 13 } }} />)
 
@@ -207,7 +215,6 @@ describe('Table', () => {
       expect(catCells[0].textContent).toBe('Cat')
       expect(lionCells[0].textContent).toBe('Lion')
     })
-
 
     test('renders empty message if no row passes the range filter', () => {
       render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 18, max: 20 } }} />)
@@ -381,6 +388,151 @@ describe('Table', () => {
 
       expect(lionCells[0].textContent).toBe('Lion')
       expect(seaLionCells[0].textContent).toBe('Sea Lion')
+    })
+
+    test('sorts the table by the clicked header', async () => {
+      render(<Table collection={ collection } columns={ columns } sort={['family']} />)
+
+      const nameHeader = screen.getAllByRole('columnheader')[0]
+      await userEvent.click(nameHeader)
+
+      const rows = screen.getAllByRole('row').slice(1)
+
+      // Rows in expected order
+      const [cat, dog, lion, seaLion] = rows
+
+      const catNameCell = within(cat).getAllByRole('cell')[0]
+      const dogNameCell = within(dog).getAllByRole('cell')[0]
+      const lionNameCell = within(lion).getAllByRole('cell')[0]
+      const seaLionNameCell = within(seaLion).getAllByRole('cell')[0]
+
+      expect(catNameCell.textContent).toBe('Cat')
+      expect(dogNameCell.textContent).toBe('Dog')
+      expect(lionNameCell.textContent).toBe('Lion')
+      expect(seaLionNameCell.textContent).toBe('Sea Lion')
+    })
+
+    describe('Sorting', () => {
+      test('sorts rows ascending', () => {
+        render(<Table collection={ collection } columns={ columns } sort={['family']} />)
+
+        const rows = screen.getAllByRole('row').slice(1)
+        expect(rows.length).toBe(collection.length)
+
+        // Rows in expected order
+        const [dog, cat, lion, seaLion] = rows
+
+        const catNameCell = within(cat).getAllByRole('cell')[0]
+        const lionNameCell = within(lion).getAllByRole('cell')[0]
+        const dogNameCell = within(dog).getAllByRole('cell')[0]
+        const seaLionNameCell = within(seaLion).getAllByRole('cell')[0]
+
+        expect(catNameCell.textContent).toBe('Cat')
+        expect(lionNameCell.textContent).toBe('Lion')
+        expect(dogNameCell.textContent).toBe('Dog')
+        expect(seaLionNameCell.textContent).toBe('Sea Lion')
+      })
+
+      test('sorts rows descending', () => {
+        render(<Table collection={ collection } columns={ columns } sort={['family', 'desc']} />)
+
+        const rows = screen.getAllByRole('row').slice(1)
+        expect(rows.length).toBe(collection.length)
+
+        // Rows in expected order
+        const [seaLion, cat, lion, dog] = rows
+
+        const catNameCell = within(cat).getAllByRole('cell')[0]
+        const lionNameCell = within(lion).getAllByRole('cell')[0]
+        const dogNameCell = within(dog).getAllByRole('cell')[0]
+        const seaLionNameCell = within(seaLion).getAllByRole('cell')[0]
+
+        expect(catNameCell.textContent).toBe('Cat')
+        expect(lionNameCell.textContent).toBe('Lion')
+        expect(dogNameCell.textContent).toBe('Dog')
+        expect(seaLionNameCell.textContent).toBe('Sea Lion')
+      })
+
+      test('sorts rows that pass a range filter, filter and search', () => {
+        render(<Table
+          collection={ collection }
+          columns={ columns }
+          filter={{ 'Age': { min: 8, max: 16 } }}
+          search='Lion'
+          sort={[ 'name', 'desc']}
+        />)
+
+        const rows = screen.getAllByRole('row').slice(1)
+        expect(rows.length).toBe(2)
+
+        // Rows in expected order
+        const [seaLion, lion] = rows
+
+        const seaLionCells = within(seaLion).getAllByRole('cell')
+        const lionCells = within(lion).getAllByRole('cell')
+
+        expect(lionCells[0].textContent).toBe('Lion')
+        expect(seaLionCells[0].textContent).toBe('Sea Lion')
+      })
+
+      test('sorts a filtered, paginated collection', () => {
+        render(<Table collection={ collection } columns={ columns } sort={['family']} pagination={ 2 } />)
+
+        const rows = screen.getAllByRole('row').slice(1)
+        expect(rows.length).toBe(2)
+
+        // Rows in expected order
+        const [dog, cat] = rows
+
+        const dogCells = within(dog).getAllByRole('cell')
+        const catCells = within(cat).getAllByRole('cell')
+
+        expect(dogCells[0].textContent).toBe('Dog')
+        expect(catCells[0].textContent).toBe('Cat')
+      })
+
+      test('sorts the table by the clicked header', async () => {
+        render(<Table collection={ collection } columns={ columns } sort={['family']} />)
+
+        const nameHeader = screen.getAllByRole('columnheader')[0]
+        await userEvent.click(nameHeader)
+
+        const rows = screen.getAllByRole('row').slice(1)
+
+        // Rows in expected order
+        const [cat, dog, lion, seaLion] = rows
+
+        const catNameCell = within(cat).getAllByRole('cell')[0]
+        const dogNameCell = within(dog).getAllByRole('cell')[0]
+        const lionNameCell = within(lion).getAllByRole('cell')[0]
+        const seaLionNameCell = within(seaLion).getAllByRole('cell')[0]
+
+        expect(catNameCell.textContent).toBe('Cat')
+        expect(dogNameCell.textContent).toBe('Dog')
+        expect(lionNameCell.textContent).toBe('Lion')
+        expect(seaLionNameCell.textContent).toBe('Sea Lion')
+      })
+
+      test('toggles sort direction when clicking the sorting header', async () => {
+        render(<Table collection={ collection } columns={ columns } sort={['family', 'asc']} />)
+
+        const familyHeader = screen.getAllByRole('columnheader')[1]
+        await userEvent.click(familyHeader)
+
+        const rows = screen.getAllByRole('row').slice(1)
+
+        // Rows in expected order
+        const [seaLion, cat, lion, dog] = getNameCellsContent(rows)
+
+        expect(cat).toBe('Cat')
+        expect(dog).toBe('Dog')
+        expect(lion).toBe('Lion')
+        expect(seaLion).toBe('Sea Lion')
+      })
+
+      test('sorts a paginated collection', () => {
+
+      })
     })
   })
 })

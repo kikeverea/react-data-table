@@ -1,5 +1,5 @@
-import { isValidElement, ReactNode, useMemo } from 'react'
-import { Entity, TableColumn, TableFilter, TableProps } from './types/types.ts'
+import {isValidElement, ReactNode, useMemo, useState} from 'react'
+import {Entity, TableColumn, TableFilter, TableProps, TableSort} from './types/types.ts'
 
 const Table = <T extends Entity>(
   {
@@ -7,28 +7,41 @@ const Table = <T extends Entity>(
   columns,
   search,
   filter,
-  sort,
+  sort: sortBy,
   noEntriesMessage
 }: TableProps<T>) => {
 
   const header = useMemo(() => columns.map(col => col.name), [columns])
 
-  const rows = collection?.length
-    ? collection
-      .filter(item => applySearchAndFilter(item, columns, search, filter))
-      .sort((item1, item2) => applySort(item1, item2, columns, sort))
-    : null
+  const [sort, setSort] = useState<TableSort | undefined>(sortBy ? [sortBy[0], sortBy[1] || 'asc'] : sortBy)
+
+  const handleSortChange = (headerName: string): void => {
+
+    const toggleSortDirection = (direction?: string): 'asc' | 'desc' => direction === 'asc' ? 'desc' : 'asc'
+
+    const [sortColumn, sortDirection] = sort || []
+    const isSameColumn = sortColumn?.toLowerCase() === headerName.toLowerCase()
+
+    const newDirection = isSameColumn
+      ? toggleSortDirection(sortDirection)
+      : 'asc'
+
+    setSort([headerName, newDirection])
+  }
 
   return (
-    <table role='table'>
-      <thead>
-        <tr>
-          { header.map(headerName => <th key={ headerName }>{ headerName }</th>) }
-        </tr>
-      </thead>
-      <tbody>
-        { rows?.length
-          ? rows.map(item =>
+    <>
+      <table role='table'>
+        <thead>
+          <tr>
+            { header.map(headerName =>
+              <th key={ headerName } onClick={ ()=> handleSortChange(headerName) }>{ headerName }</th>)
+            }
+          </tr>
+        </thead>
+        <tbody>
+          { rows?.length
+            ? rows.map(item =>
               <tr key={ item.id }>
                 { columns.map(column =>
                   <td key={ `${item.id}-${column.name}` }>
@@ -37,7 +50,7 @@ const Table = <T extends Entity>(
                 }
               </tr>
             )
-          : <tr key='empty-message'>
+            : <tr key='empty-message'>
               <td>{ noEntriesMessage || 'No data available' }</td>
             </tr>
         }
