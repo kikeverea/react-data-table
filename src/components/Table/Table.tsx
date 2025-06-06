@@ -1,5 +1,5 @@
 import {isValidElement, ReactNode, useMemo, useState} from 'react'
-import {Entity, TableColumn, TableFilter, TableProps, TableSort} from './types/types.ts'
+import {Entity, FilterRange, TableColumn, TableFilter, TableProps, TableSort} from './types/types.ts'
 
 const Table = <T extends Entity>(
   {
@@ -215,9 +215,9 @@ const applySort = <T extends Entity>(
 
 const needsParsing = (value: unknown): value is string => typeof value === 'string'
 
-const evaluateFilter = (filter: string | { min?: number | string, max?: number | string, parser?: (value: any) => number }, value: string): boolean => {
+const evaluateFilter = (filter: string[] | FilterRange, value: string): boolean => {
 
-  const isRange = typeof filter !== 'string'
+  const isRange = !Array.isArray(filter)
 
   if (isRange) {
 
@@ -239,7 +239,7 @@ const evaluateFilter = (filter: string | { min?: number | string, max?: number |
     else return true
   }
   else
-    return value.includes(filter.toLowerCase())
+    return filter.some(filterValue => value.toLowerCase().includes(filterValue.toLowerCase()))
 }
 
 const pageRange = (currentPage: number, pagination: number | undefined, collectionLength: number): readonly [number, number]=> {

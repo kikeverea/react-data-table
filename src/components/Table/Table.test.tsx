@@ -143,22 +143,24 @@ describe('Table', () => {
     })
 
     describe('Filter', () => {
+
       test('renders rows that pass the filter', () => {
-        render(<Table collection={ collection } columns={ columns } filter={{
-          'Family': 'feline',
-          'Type': 'wild',
-        }}
+        render(<Table collection={ longCollection } columns={ columns } filter={{
+            'Family': ['feline', 'canine'],
+            'Type': ['wild'],
+          }}
         />)
 
         const rows = screen.getAllByRole('row').slice(1)
-        const [lion] = getNameCellsContent(rows)
+        const [lion, redFox] = getNameCellsContent(rows)
 
-        expect(rows.length).toBe(1)
+        expect(rows.length).toBe(2)
         expect(lion).toBe('Lion')
+        expect(redFox).toBe('Red Fox')
       })
 
       test('renders rows that pass the filter and search', () => {
-        render(<Table collection={ collection } columns={ columns } search='cat' filter={{ 'Family': 'feline' }} />)
+        render(<Table collection={ collection } columns={ columns } search='cat' filter={{ 'Family': ['feline'] }} />)
 
         const rows = screen.getAllByRole('row').slice(1)
         const [cat] = getNameCellsContent(rows)
@@ -211,7 +213,7 @@ describe('Table', () => {
         { 'Age': { min: 18 } },
         { 'Age': { max: 2 } },
         { 'Age': { min: 18, max: 20 } },
-        { 'Family': 'feline', 'Name': 'dog' }
+        { 'Family': ['feline'], 'Name': ['dog'] }
       ])
       ('renders empty message if no row passes the filter', noPassFilter => {
         render(<Table collection={ collection } columns={ columns } filter={ noPassFilter as { [column: string]: any } } />)
@@ -224,7 +226,7 @@ describe('Table', () => {
       })
 
       test('renders empty message if no row passes the filter and search', () => {
-        render(<Table collection={ collection } columns={ columns } search='dog' filter={{ 'Family': 'feline' }} />)
+        render(<Table collection={ collection } columns={ columns } search='dog' filter={{ 'Family': ['feline'] }} />)
 
         const rows = screen.getAllByRole('row').slice(1)
         const [emptyMessage] = getNameCellsContent(rows)
@@ -275,7 +277,7 @@ describe('Table', () => {
         render(<Table
           collection={ collection }
           columns={ columns }
-          filter={{ 'Age': { min: 8, max: 16 }, 'Family': 'feline' }}
+          filter={{ 'Age': { min: 8, max: 16 }, 'Family': ['feline'] }}
           search='Lion'
         />)
 
