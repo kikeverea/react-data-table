@@ -189,6 +189,16 @@ const applySort = <T extends Entity>(
       const date1 = new Date(value1)
       const date2 = new Date(value2)
 
+      if (isNaN(date1.getTime())) {
+        console.warn(`Invalid date: '${value1}'`)
+        return 1  // sort in last position
+      }
+
+      if (isNaN(date2.getTime())) {
+        console.warn(`Invalid date: '${value2}'`)
+        return 1  // sort in last position
+      }
+
       if (date1 < date2)
         return direction === 'asc' ? -1 : 1
 
