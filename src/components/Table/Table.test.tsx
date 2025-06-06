@@ -20,26 +20,27 @@ describe('Table', () => {
     { name: 'Name', data: item => `${item.name}`},
     { name: 'Family', data: item => `${item.family}`},
     { name: 'Type', data: item => `${item.type}`},
-    { name: 'Age', data: item => `${item.age}`},
-    { name: 'Birth', data: item => `${item.birth}`},
+    { name: 'Age', data: item => `${item.age}`, type: 'number' },
+    { name: 'Birth', data: item => `${item.birth}`, type: 'date' },
   ]
 
   const collection: TestData[] = [
-    { id: 1, name: 'Cat', family: 'Feline', type: 'Pet', age: 10, birth: '14-07-2015' },
-    { id: 2, name: 'Dog', family: 'Canine', type: 'Pet', age: 5, birth: '14-07-2020' },
-    { id: 3, name: 'Lion', family: 'Feline', type: 'Wild', age: 13, birth: '14-07-2012' },
-    { id: 4, name: 'Sea Lion', family: 'Seals', type: 'Wild', age: 16, birth: '14-07-2009' },
+    { id: 1, name: 'Cat', family: 'Feline', type: 'Pet', age: 10, birth: '2015-07-14' },
+    { id: 2, name: 'Dog', family: 'Canine', type: 'Pet', age: 5, birth: '2020-07-14' },
+    { id: 3, name: 'Lion', family: 'Feline', type: 'Wild', age: 13, birth: '2012-07-14' },
+    { id: 4, name: 'Sea Lion', family: 'Seals', type: 'Wild', age: 16, birth: '2009-07-14' },
   ]
 
   const longCollection: TestData[] = [
-    { id: 1, name: 'Cat', family: 'Feline', type: 'Pet', age: 10, birth: '14-07-2015' },
-    { id: 2, name: 'Dog', family: 'Canine', type: 'Pet', age: 5, birth: '14-07-2020' },
-    { id: 3, name: 'Lion', family: 'Feline', type: 'Wild', age: 13, birth: '14-07-2012' },
-    { id: 4, name: 'Sea Lion', family: 'Seals', type: 'Wild', age: 16, birth: '14-07-2009' },
-    { id: 5, name: 'Red Fox', family: 'Canine', type: 'Wild', age: 16, birth: '22-03-2019' },
-    { id: 6, name: 'Gold Fish', family: 'Fish', type: 'Pet', age: 16, birth: '16-11-2022' },
-    { id: 7, name: 'Monkey', family: 'Primate', type: 'Wild', age: 16, birth: '08-01-2020' },
+    { id: 1, name: 'Cat', family: 'Feline', type: 'Pet', age: 10, birth: '2015-07-14' },
+    { id: 2, name: 'Dog', family: 'Canine', type: 'Pet', age: 5, birth: '2020-07-14' },
+    { id: 3, name: 'Lion', family: 'Feline', type: 'Wild', age: 13, birth: '2012-07-14' },
+    { id: 4, name: 'Sea Lion', family: 'Seals', type: 'Wild', age: 16, birth: '2009-07-14' },
+    { id: 5, name: 'Red Fox', family: 'Canine', type: 'Wild', age: 6, birth: '2019-03-22' },
+    { id: 6, name: 'Gold Fish', family: 'Fish', type: 'Pet', age: 3, birth: '2022-11-16' },
+    { id: 7, name: 'Monkey', family: 'Primate', type: 'Wild', age: 5, birth: '2020-01-08' },
   ]
+
   const getTestData = ({ row, col }: { row: number, col: number }) => {
 
     const dataRow = collection[row]
@@ -273,7 +274,7 @@ describe('Table', () => {
       })
 
       test('renders rows that pass the date range filter', () => {
-        const dateFormat = 'dd-MM-yyyy'
+        const dateFormat = 'yyyy-MM-dd'
 
         render(
           <Table
@@ -281,8 +282,8 @@ describe('Table', () => {
             columns={ columns }
             filter={{
               'Birth': {
-                min: '14-07-2012',
-                max: '14-07-2015',
+                min: '2012-07-14',
+                max: '2015-07-14',
                 parser: date => parse(date, dateFormat, new Date()).getTime()
               }}}
           />)
@@ -334,6 +335,16 @@ describe('Table', () => {
         pageLinks.forEach((link, ind) => {
           expect(link.textContent).toBe(`${ind + 1}`)
         })
+      })
+
+      test('page numbers include aria-current for accessibility', () => {
+        render(<Table collection={ collection } columns={ columns } pagination={ 2 }/>)
+
+        const paginationNavigation = screen.getByLabelText('Pagination Navigation')
+        const pageLinks = within(paginationNavigation).getAllByRole('listitem')
+
+        expect(pageLinks[0].ariaCurrent).toBe('true')
+        expect(pageLinks[1].ariaCurrent).toBe('false')
       })
 
       test('with pagination, render pagination info', () => {
@@ -394,10 +405,10 @@ describe('Table', () => {
         const leftArrow = within(paginationNavigation).getByLabelText('Go to previous page')
         await userEvent.click(leftArrow)
 
-        const [firstCellName] = getNameCellsContent()
+        const [cellName] = getNameCellsContent()
         const expectedPage = 3
 
-        expect(firstCellName).toBe(longCollection[expectedPage].name)
+        expect(cellName).toBe(longCollection[expectedPage].name)
       })
 
       test('left arrow navigates to next page', async () => {
@@ -438,7 +449,7 @@ describe('Table', () => {
 
     describe('Sorting', () => {
       test('sorts rows ascending', () => {
-        render(<Table collection={ collection } columns={ columns } sort={['family']} />)
+        render(<Table collection={ collection } columns={ columns } sort={{ by: 'family' }} />)
 
         const rows = screen.getAllByRole('row').slice(1)
         expect(rows.length).toBe(collection.length)
@@ -453,7 +464,7 @@ describe('Table', () => {
       })
 
       test('sorts rows descending', () => {
-        render(<Table collection={ collection } columns={ columns } sort={['family', 'desc']} />)
+        render(<Table collection={ collection } columns={ columns } sort={{ by: 'family', direction: 'desc' }} />)
 
         const rows = screen.getAllByRole('row').slice(1)
         expect(rows.length).toBe(collection.length)
@@ -467,13 +478,61 @@ describe('Table', () => {
         expect(seaLion).toBe('Sea Lion')
       })
 
+      test('sorts by number asc', () => {
+        render(<Table collection={ collection } columns={ columns } sort={{ by: 'age' }} />)
+
+        // Names in expected order
+        const [dog, cat, lion, seaLion] = getNameCellsContent()
+
+        expect(dog).toBe('Dog')
+        expect(cat).toBe('Cat')
+        expect(lion).toBe('Lion')
+        expect(seaLion).toBe('Sea Lion')
+      })
+
+      test('sorts by number desc', () => {
+        render(<Table collection={ collection } columns={ columns } sort={{ by: 'age', direction: 'desc' }} />)
+
+        // Names in expected order
+        const [seaLion, lion, cat, dog] = getNameCellsContent()
+
+        expect(seaLion).toBe('Sea Lion')
+        expect(lion).toBe('Lion')
+        expect(cat).toBe('Cat')
+        expect(dog).toBe('Dog')
+      })
+
+      test('sorts by date asc', () => {
+        render(<Table collection={ collection } columns={ columns } sort={{ by: 'birth' }} />)
+
+        // Names in expected order
+        const [seaLion, lion, cat, dog] = getNameCellsContent()
+
+        expect(seaLion).toBe('Sea Lion')
+        expect(lion).toBe('Lion')
+        expect(cat).toBe('Cat')
+        expect(dog).toBe('Dog')
+      })
+
+      test('sorts by date desc', () => {
+        render(<Table collection={ collection } columns={ columns } sort={{ by: 'birth', direction: 'desc' }} />)
+
+        // Names in expected order
+        const [dog, cat, lion, seaLion] = getNameCellsContent()
+
+        expect(dog).toBe('Dog')
+        expect(cat).toBe('Cat')
+        expect(lion).toBe('Lion')
+        expect(seaLion).toBe('Sea Lion')
+      })
+
       test('sorts rows that pass a range filter, filter and search', () => {
         render(<Table
           collection={ collection }
           columns={ columns }
           filter={{ 'Age': { min: 8, max: 16 } }}
           search='Lion'
-          sort={[ 'name', 'desc']}
+          sort={{ by: 'name', direction: 'desc' }}
         />)
 
         const rows = screen.getAllByRole('row').slice(1)
@@ -487,7 +546,7 @@ describe('Table', () => {
       })
 
       test('sorts a filtered, paginated collection', () => {
-        render(<Table collection={ collection } columns={ columns } sort={['family']} pagination={ 2 } />)
+        render(<Table collection={ collection } columns={ columns } sort={{ by: 'family' }} pagination={ 2 } />)
 
         const rows = screen.getAllByRole('row').slice(1)
         expect(rows.length).toBe(2)
@@ -500,7 +559,7 @@ describe('Table', () => {
       })
 
       test('sorts the table by the clicked header', async () => {
-        render(<Table collection={ collection } columns={ columns } sort={['family']} />)
+        render(<Table collection={ collection } columns={ columns } sort={{ by: 'family' }} />)
 
         const nameHeader = screen.getAllByRole('columnheader')[0]
         await userEvent.click(nameHeader)
@@ -515,7 +574,7 @@ describe('Table', () => {
       })
 
       test('toggles sort direction when clicking the sorting header', async () => {
-        render(<Table collection={ collection } columns={ columns } sort={['family', 'asc']} />)
+        render(<Table collection={ collection } columns={ columns } sort={{ by: 'family', direction: 'asc'}} />)
 
         const familyHeader = screen.getAllByRole('columnheader')[1]
         await userEvent.click(familyHeader)
@@ -530,7 +589,13 @@ describe('Table', () => {
       })
 
       test('sorts a paginated collection', () => {
+        render( <Table collection={ longCollection } columns={ columns } sort={{ by: 'family' }} pagination={ 2 } />)
 
+        // Names in expected order
+        const [dog, cat] = getNameCellsContent()
+
+        expect(dog).toBe('Dog')
+        expect(cat).toBe('Cat')
       })
     })
   })

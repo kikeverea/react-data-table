@@ -15,22 +15,23 @@ const Table = <T extends Entity>(
 
   const header = useMemo(() => columns.map(col => col.name), [columns])
 
-  const [sort, setSort] = useState<TableSort | undefined>(sortBy ? [sortBy[0], sortBy[1] || 'asc'] : sortBy)
+  const [sort, setSort] = useState<TableSort | undefined>(sortBy)
   const [pagination, setPagination] = useState(itemsPerPage)
   const [page, setPage] = useState(currentPage || 0)
 
   const handleSortChange = (headerName: string): void => {
+    if (!sort)
+      return setSort({ by: headerName })
 
     const toggleSortDirection = (direction?: string): 'asc' | 'desc' => direction === 'asc' ? 'desc' : 'asc'
 
-    const [sortColumn, sortDirection] = sort || []
-    const isSameColumn = sortColumn?.toLowerCase() === headerName.toLowerCase()
+    const isSameColumn = sort.by.toLowerCase() === headerName.toLowerCase()
 
-    const newDirection = isSameColumn
-      ? toggleSortDirection(sortDirection)
+    const direction = isSameColumn
+      ? toggleSortDirection(sort.direction || 'asc')
       : 'asc'
 
-    setSort([headerName, newDirection])
+    setSort({ by: headerName, direction: direction })
   }
 
   const [pageStart, pageEnd] = pageRange(page, pagination, collection?.length || 0)
@@ -48,7 +49,7 @@ const Table = <T extends Entity>(
 
   return (
     <>
-      <table role='table'>
+      <table>
         <thead>
           <tr>
             { header.map(headerName =>
@@ -158,27 +159,49 @@ const applySort = <T extends Entity>(
   item1: T,
   item2: T,
   columns: TableColumn<T>[],
-  sort?: readonly [string, ('asc' | 'desc')?],
+  sort?: TableSort,
 ): number => {
 
   if (!sort)
     return 0
 
-  const [sortColumn, sortDirection='asc'] = sort
-  const column =
-    columns.find(column => column.name.toLowerCase() === sortColumn.toLowerCase())
+  const column = columns.find(column => column.name.toLowerCase() === sort.by.toLowerCase())
 
   if (!column)
     return 0
 
   const value1 = extractValue(column.data(item1)).toLowerCase()
   const value2 = extractValue(column.data(item2)).toLowerCase()
+  const direction = sort.direction || 'asc'
 
-  return sortDirection === 'asc'
-    ? value1.localeCompare(value2)
-    : value2.localeCompare(value1)
+  switch (column.type || 'text') {
+    case 'text':
+      return direction === 'asc'
+        ? value1.localeCompare(value2)
+        : value2.localeCompare(value1)
+
+    case 'number':
+      return direction === 'asc'
+        ? parseFloat(value1) - parseFloat(value2)
+        : parseFloat(value2) - parseFloat(value1)
+
+    case 'date':
+      const date1 = new Date(value1)
+      const date2 = new Date(value2)
+
+      if (date1 < date2)
+        return direction === 'asc' ? -1 : 1
+
+      else if (date1 > date2)
+        return direction === 'asc' ? 1 : -1
+
+      else return 0
+
+    default:
+      throw new Error(`Invalid column type: ${column.type}`)
+  }
+
 }
-
 
 const needsParsing = (value: unknown): value is string => typeof value === 'string'
 

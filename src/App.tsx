@@ -17,8 +17,8 @@ function App() {
     { name: 'Name', data: item => `${item.name}`},
     { name: 'Family', data: item => `${item.family}`},
     { name: 'Type', data: item => `${item.type}`},
-    { name: 'Age', data: item => `${item.age}`},
-    { name: 'Birth', data: item => `${item.birth}`},
+    { name: 'Age', data: item => `${item.age}`, type: 'number'},
+    { name: 'Birth', data: item => `${item.birth}`, type: 'date'},
   ]
 
   const collection: Animal[] = [
@@ -34,7 +34,7 @@ function App() {
   return (
     <>
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <Table collection={ collection } columns={ columns } sort={['family']} pagination={ 2 } />
+        <Table collection={ collection } columns={ columns } sort={{ by: 'family' }} pagination={ 2 } />
       </div>
     </>
   )

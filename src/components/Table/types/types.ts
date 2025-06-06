@@ -6,11 +6,12 @@ export type TableFilter = {
   [column: string]: string | { min?: number | string, max?: number | string, parser?: (value: string) => number }
 }
 
-export type TableSort = readonly [string, ('asc' | 'desc')]
+export type TableSort = { by: string, direction?: 'asc' | 'desc' }
 
 export type TableColumn<T extends Entity> = {
   name: string,
-  data: (item: T) => ReactNode
+  data: (item: T) => ReactNode,
+  type?: 'text' | 'number' | 'date'
 }
 
 export type TableProps<T extends Entity> = {
@@ -18,7 +19,7 @@ export type TableProps<T extends Entity> = {
   columns: TableColumn<T>[],
   search?: string,
   filter?: TableFilter,
-  sort?: readonly [string, ('asc' | 'desc')?],
+  sort?: TableSort,
   noEntriesMessage?: string,
   pagination?: number,
   page?: number,
