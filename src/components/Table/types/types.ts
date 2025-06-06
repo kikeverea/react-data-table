@@ -14,10 +14,12 @@ export type TableColumn<T extends Entity> = {
 }
 
 export type TableProps<T extends Entity> = {
-  collection: T[] | null | undefined
+  collection?: T[]
   columns: TableColumn<T>[],
   search?: string,
   filter?: TableFilter,
   sort?: readonly [string, ('asc' | 'desc')?],
-  noEntriesMessage?: string
+  noEntriesMessage?: string,
+  pagination?: number,
+  page?: number,
 }

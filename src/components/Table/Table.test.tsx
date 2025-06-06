@@ -31,9 +31,18 @@ describe('Table', () => {
     { id: 4, name: 'Sea Lion', family: 'Seals', type: 'Wild', age: 16, birth: '14-07-2009' },
   ]
 
+  const longCollection: TestData[] = [
+    { id: 1, name: 'Cat', family: 'Feline', type: 'Pet', age: 10, birth: '14-07-2015' },
+    { id: 2, name: 'Dog', family: 'Canine', type: 'Pet', age: 5, birth: '14-07-2020' },
+    { id: 3, name: 'Lion', family: 'Feline', type: 'Wild', age: 13, birth: '14-07-2012' },
+    { id: 4, name: 'Sea Lion', family: 'Seals', type: 'Wild', age: 16, birth: '14-07-2009' },
+    { id: 5, name: 'Red Fox', family: 'Canine', type: 'Wild', age: 16, birth: '22-03-2019' },
+    { id: 6, name: 'Gold Fish', family: 'Fish', type: 'Pet', age: 16, birth: '16-11-2022' },
+    { id: 7, name: 'Monkey', family: 'Primate', type: 'Wild', age: 16, birth: '08-01-2020' },
+  ]
   const getTestData = ({ row, col }: { row: number, col: number }) => {
-    const dataRow = collection[row]
 
+    const dataRow = collection[row]
     switch (col) {
       case 0 :
         return String(dataRow.name)
@@ -328,88 +337,134 @@ describe('Table', () => {
       expect(cells[0].textContent).toBe('Lion')
     })
 
-    test('sorts rows ascending', () => {
-      render(<Table collection={ collection } columns={ columns } sort={['family']} />)
+    describe('Pagination', () => {
 
-      const rows = screen.getAllByRole('row').slice(1)
-      expect(rows.length).toBe(collection.length)
+      test('without pagination, page numbers are not rendered', () => {
+        render(<Table collection={ collection } columns={ columns } />)
 
-      // Rows in expected order
-      const [dog, cat, lion, seaLion] = rows
+        const paginationNavigation = screen.queryByLabelText('Pagination Navigation')
+        expect(paginationNavigation).toBeNull()
+      })
 
-      const catNameCell = within(cat).getAllByRole('cell')[0]
-      const lionNameCell = within(lion).getAllByRole('cell')[0]
-      const dogNameCell = within(dog).getAllByRole('cell')[0]
-      const seaLionNameCell = within(seaLion).getAllByRole('cell')[0]
+      test('with pagination, render page numbers', () => {
+        render(<Table collection={ collection } columns={ columns } pagination={ 2 }/>)
 
-      expect(catNameCell.textContent).toBe('Cat')
-      expect(lionNameCell.textContent).toBe('Lion')
-      expect(dogNameCell.textContent).toBe('Dog')
-      expect(seaLionNameCell.textContent).toBe('Sea Lion')
-    })
+        const paginationNavigation = screen.getByLabelText('Pagination Navigation')
+        expect(paginationNavigation).toBeDefined()
 
-    test('sorts rows descending', () => {
-      render(<Table collection={ collection } columns={ columns } sort={['family', 'desc']} />)
+        const pageLinks = within(paginationNavigation).getAllByRole('listitem')
+        expect(pageLinks.length).toBe(2)
 
-      const rows = screen.getAllByRole('row').slice(1)
-      expect(rows.length).toBe(collection.length)
+        pageLinks.forEach((link, ind) => {
+          expect(link.textContent).toBe(`${ind + 1}`)
+        })
+      })
 
-      // Rows in expected order
-      const [seaLion, cat, lion, dog] = rows
+      test('with pagination, render pagination info', () => {
+        render(<Table collection={ longCollection } columns={ columns } pagination={ 2 }/>)
 
-      const catNameCell = within(cat).getAllByRole('cell')[0]
-      const lionNameCell = within(lion).getAllByRole('cell')[0]
-      const dogNameCell = within(dog).getAllByRole('cell')[0]
-      const seaLionNameCell = within(seaLion).getAllByRole('cell')[0]
+        const paginationInfo = screen.getByRole('status')
 
-      expect(catNameCell.textContent).toBe('Cat')
-      expect(lionNameCell.textContent).toBe('Lion')
-      expect(dogNameCell.textContent).toBe('Dog')
-      expect(seaLionNameCell.textContent).toBe('Sea Lion')
-    })
+        expect(paginationInfo.textContent).toBe(`Showing 1 to 2 of ${longCollection.length} records`)
+      })
 
-    test('sorts rows that pass a range filter, filter and search', () => {
-      render(<Table
-        collection={ collection }
-        columns={ columns }
-        filter={{ 'Age': { min: 8, max: 16 } }}
-        search='Lion'
-        sort={[ 'name', 'desc']}
-      />)
+      test('paginates data', () => {
+        render(<Table collection={ collection } columns={ columns } pagination={ 2 }/>)
 
-      const rows = screen.getAllByRole('row').slice(1)
-      expect(rows.length).toBe(2)
+        const rows = screen.getAllByRole('row').slice(1)
+        expect(rows.length).toBe(2)
 
-      // Rows in expected order
-      const [seaLion, lion] = rows
+        const [cat, dog] = rows
 
-      const seaLionCells = within(seaLion).getAllByRole('cell')
-      const lionCells = within(lion).getAllByRole('cell')
+        const catCells = within(cat).getAllByRole('cell')
+        const dogCells = within(dog).getAllByRole('cell')
 
-      expect(lionCells[0].textContent).toBe('Lion')
-      expect(seaLionCells[0].textContent).toBe('Sea Lion')
-    })
+        expect(catCells[0].textContent).toBe('Cat')
+        expect(dogCells[0].textContent).toBe('Dog')
+      })
 
-    test('sorts the table by the clicked header', async () => {
-      render(<Table collection={ collection } columns={ columns } sort={['family']} />)
+      test('render the selected page data', async () => {
+        render(<Table collection={ collection } columns={ columns } pagination={ 2 }/>)
 
-      const nameHeader = screen.getAllByRole('columnheader')[0]
-      await userEvent.click(nameHeader)
+        const paginationNavigation = screen.getByLabelText('Pagination Navigation')
+        const pageNumbers = within(paginationNavigation).getAllByRole('listitem')
 
-      const rows = screen.getAllByRole('row').slice(1)
+        await userEvent.click(pageNumbers[1])
 
-      // Rows in expected order
-      const [cat, dog, lion, seaLion] = rows
+        const rows = screen.getAllByRole('row').slice(1)
+        const [lion, seaLion] = rows
 
-      const catNameCell = within(cat).getAllByRole('cell')[0]
-      const dogNameCell = within(dog).getAllByRole('cell')[0]
-      const lionNameCell = within(lion).getAllByRole('cell')[0]
-      const seaLionNameCell = within(seaLion).getAllByRole('cell')[0]
+        const lionCells = within(lion).getAllByRole('cell')
+        const seaLionCells = within(seaLion).getAllByRole('cell')
 
-      expect(catNameCell.textContent).toBe('Cat')
-      expect(dogNameCell.textContent).toBe('Dog')
-      expect(lionNameCell.textContent).toBe('Lion')
-      expect(seaLionNameCell.textContent).toBe('Sea Lion')
+        expect(lionCells[0].textContent).toBe('Lion')
+        expect(seaLionCells[0].textContent).toBe('Sea Lion')
+      })
+
+      test('if more than 6 pages, render navigation arrows', () => {
+        render(<Table collection={ longCollection } columns={ columns } pagination={ 1 }/>)
+
+        const paginationNavigation = screen.getByLabelText('Pagination Navigation')
+
+        const pageNumbers = within(paginationNavigation).getAllByRole('listitem')
+        const leftArrow = within(paginationNavigation).getByLabelText('Go to previous page')
+        const rightArrow = within(paginationNavigation).getByLabelText('Go to next page')
+
+        expect(pageNumbers.length - 2).toBe(6)
+        expect(leftArrow).toBeDefined()
+        expect(rightArrow).toBeDefined()
+      })
+
+      test('left arrow navigates to previous page', async () => {
+        render(<Table collection={ longCollection } columns={ columns } pagination={ 1 } page={ 4 } />)
+
+        const paginationNavigation = screen.getByLabelText('Pagination Navigation')
+
+        const leftArrow = within(paginationNavigation).getByLabelText('Go to previous page')
+        await userEvent.click(leftArrow)
+
+        const row = screen.getAllByRole('row').slice(1)[0]
+        const nameCell = within(row).getAllByRole('cell')[0]
+        const expectedPage = 3
+
+        expect(nameCell.textContent).toBe(longCollection[expectedPage].name)
+      })
+
+      test('left arrow navigates to next page', async () => {
+        render(<Table collection={ longCollection } columns={ columns } pagination={ 1 } page={ 4 } />)
+
+        const paginationNavigation = screen.getByLabelText('Pagination Navigation')
+
+        const rightArrow = within(paginationNavigation).getByLabelText('Go to next page')
+        await userEvent.click(rightArrow)
+
+        const row = screen.getAllByRole('row').slice(1)[0]
+        const nameCell = within(row).getAllByRole('cell')[0]
+        const expectedPage = 5
+
+        expect(nameCell.textContent).toBe(longCollection[expectedPage].name)
+      })
+
+      test('has select for choosing items per page', () => {
+        render(<Table collection={ longCollection } columns={ columns } pagination={ 2 } />)
+
+        const paginationNavigation = screen.getByLabelText('Pagination Navigation')
+        const pageCountSelect = within(paginationNavigation).getByRole('combobox')
+
+        expect(pageCountSelect).toBeDefined()
+      })
+
+      test('has select for choosing items per page', async () => {
+        render(<Table collection={ longCollection } columns={ columns } pagination={ 2 } />)
+
+        const paginationNavigation = screen.getByLabelText('Pagination Navigation')
+        const pageCountSelect = within(paginationNavigation).getByRole('combobox')
+
+        await userEvent.selectOptions(pageCountSelect, '10')
+
+        const rows = screen.getAllByRole('row').slice(1)
+        expect(rows).toHaveLength(Math.min(longCollection.length, 10))
+      })
     })
 
     describe('Sorting', () => {

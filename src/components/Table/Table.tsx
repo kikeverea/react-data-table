@@ -8,12 +8,16 @@ const Table = <T extends Entity>(
   search,
   filter,
   sort: sortBy,
-  noEntriesMessage
+  pagination: itemsPerPage,
+  page: currentPage,
+  noEntriesMessage,
 }: TableProps<T>) => {
 
   const header = useMemo(() => columns.map(col => col.name), [columns])
 
   const [sort, setSort] = useState<TableSort | undefined>(sortBy ? [sortBy[0], sortBy[1] || 'asc'] : sortBy)
+  const [pagination, setPagination] = useState(itemsPerPage)
+  const [page, setPage] = useState(currentPage || 0)
 
   const handleSortChange = (headerName: string): void => {
 
@@ -28,6 +32,19 @@ const Table = <T extends Entity>(
 
     setSort([headerName, newDirection])
   }
+
+  const [pageStart, pageEnd] = pageRange(page, pagination, collection?.length || 0)
+
+  const pages = pagination
+    ? Math.ceil((collection?.length || 0) / pagination)
+    : 1
+
+  const rows = collection?.length
+    ? collection
+        .filter(item => applySearchAndFilter(item, columns, search, filter))
+        .slice(pageStart, pageEnd)      // paginate
+        .sort((item1, item2) => applySort(item1, item2, columns, sort))
+    : []
 
   return (
     <>
@@ -53,9 +70,49 @@ const Table = <T extends Entity>(
             : <tr key='empty-message'>
               <td>{ noEntriesMessage || 'No data available' }</td>
             </tr>
-        }
-      </tbody>
-    </table>
+          }
+        </tbody>
+      </table>
+      {
+        pagination &&
+        <div>
+          <span role="status" aria-live="polite">
+            { paginationInfoMessage(page, pagination, collection) }
+          </span>
+          <nav aria-label="Pagination Navigation">
+            <ul>
+              <select
+                id="per-page-select"
+                name="per-page-select"
+                onChange={ (e) => setPagination(parseInt(e.currentTarget.value)) }
+              >
+                { pagination < 10 && <option value={ pagination }>{ pagination }</option> }
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+              { pages > 6 &&
+                <li onClick={ () => setPage(page - 1) } aria-label='Go to previous page'>←</li>
+              }
+              { Array.from({ length: Math.min(pages, 6) }).map((_u, index: number) =>
+                <li
+                  key={ index }
+                  style={{ padding: '10px', backgroundColor: "#1A84FF", color: 'white', display: 'flex', gap: '16px' }}
+                  aria-label={ `Go to page ${index + 1}` }
+                  aria-current={ page === index }
+                  onClick={() => setPage(index)}
+                >
+                  { index + 1 }
+                </li>
+              )}
+              { pages > 6 &&
+                <li onClick={ () => setPage(page + 1) } aria-label='Go to next page'>→</li>
+              }
+            </ul>
+          </nav>
+        </div>
+      }
+    </>
   )
 }
 
@@ -150,6 +207,26 @@ const evaluateFilter = (filter: string | { min?: number | string, max?: number |
   }
   else
     return value.includes(filter.toLowerCase())
+}
+
+const pageRange = (currentPage: number, pagination: number | undefined, collectionLength: number): readonly [number, number]=> {
+  if (!pagination)
+    return [0, collectionLength]
+
+  const startIndex = currentPage * pagination
+  const endIndex = startIndex + pagination
+
+  return [startIndex, endIndex]
+}
+
+const paginationInfoMessage = (currentPage: number, itemsPerPage: number, collection?: any[]): string => {
+  if (!collection)
+    return ''
+
+  const start = currentPage * itemsPerPage
+  const end = Math.min(collection.length, start + itemsPerPage)
+
+  return `Showing ${start + 1} to ${end} of ${collection.length} records`
 }
 
 export default Table
