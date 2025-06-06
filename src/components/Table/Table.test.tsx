@@ -61,7 +61,11 @@ describe('Table', () => {
     }
   }
 
-  const getNameCellsContent = (rows: HTMLElement[]) => {
+  const getNameCellsContent = (collection?: HTMLElement[]) => {
+    const rows = collection
+      ? collection
+      : screen.getAllByRole('row').slice(1)   // rows excluding the header row
+
     return rows.map(row => within(row).getAllByRole('cell')[0].textContent)
   }
 
@@ -81,15 +85,21 @@ describe('Table', () => {
     test('renders empty message', () => {
       render(<Table collection={ [] } columns={ columns } />)
 
-      const emptyMessage = screen.getByText('No data available')
-      expect(emptyMessage).toBeDefined()
+      const rows = screen.getAllByRole('row').slice(1)
+      const [emptyMessage] = getNameCellsContent(rows)
+
+      expect(rows.length).toBe(1)
+      expect(emptyMessage).toBe('No data available')
     })
 
     test('renders custom empty message', () => {
       render(<Table collection={ [] } columns={ columns } noEntriesMessage='No entries'/>)
 
-      const emptyMessage = screen.getByText('No entries')
-      expect(emptyMessage).toBeDefined()
+      const rows = screen.getAllByRole('row').slice(1)
+      const [emptyMessage] = getNameCellsContent(rows)
+
+      expect(rows.length).toBe(1)
+      expect(emptyMessage).toBe('No entries')
     })
   })
 
@@ -109,232 +119,198 @@ describe('Table', () => {
       })
     })
 
-    test('renders rows that pass the search', () => {
-      render(<Table collection={ collection } columns={ columns } search='dog' />)
+    describe('Search', () => {
+      test('renders rows that pass the search', () => {
+        render(<Table collection={ collection } columns={ columns } search='dog' />)
 
-      const rows = screen.getAllByRole('row')
+        const rows = screen.getAllByRole('row').slice(1)
+        const [lion] = getNameCellsContent(rows)
 
-      expect(rows.length).toBe(2)   // 2 = header row + data row
+        expect(rows.length).toBe(1)
+        expect(lion).toBe('Dog')
+      })
 
-      const filteredRow = rows[1]
-      const cells = within(filteredRow).getAllByRole('cell')
+      test('renders empty message if no row passes the search', () => {
+        render(<Table collection={ collection } columns={ columns } search='no-rows' />)
 
-      expect(cells[0].textContent).toBe('Dog')
+        const rows = screen.getAllByRole('row').slice(1)
+        const [emptyMessage] = getNameCellsContent(rows)
+
+        expect(rows.length).toBe(1)
+        expect(emptyMessage).toBe('No data available')
+      })
     })
 
-    test('renders empty message if no row passes the search', () => {
-      render(<Table collection={ collection } columns={ columns } search='no-rows' />)
-
-      const rows = screen.getAllByRole('row')
-
-      expect(rows.length).toBe(2)   // 2 = header row + empty message row
-
-      const emptyMessageRow = rows[1]
-      const cells = within(emptyMessageRow).getAllByRole('cell')
-
-      expect(cells[0].textContent).toBe('No data available')
-    })
-
-    test('renders rows that pass the filter', () => {
-      render(<Table collection={ collection } columns={ columns } filter={{
+    describe('Filter', () => {
+      test('renders rows that pass the filter', () => {
+        render(<Table collection={ collection } columns={ columns } filter={{
           'Family': 'feline',
           'Type': 'wild',
         }}
-      />)
+        />)
 
-      const rows = screen.getAllByRole('row')
-      expect(rows.length).toBe(2)   // 2 = header row + data row
+        const rows = screen.getAllByRole('row').slice(1)
+        const [lion] = getNameCellsContent(rows)
 
-      const filteredRow = rows[1]
-      const cells = within(filteredRow).getAllByRole('cell')
-      expect(cells[0].textContent).toBe('Lion')
-    })
+        expect(rows.length).toBe(1)
+        expect(lion).toBe('Lion')
+      })
 
-    test('renders empty message if no row passes the filter', () => {
-      render(<Table collection={ collection } columns={ columns } filter={{
-        'Family': 'feline',
-        'Name': 'dog',
-      }} />)
+      test('renders empty message if no row passes the filter', () => {
+        render(<Table collection={ collection } columns={ columns } filter={{
+          'Family': 'feline',
+          'Name': 'dog',
+        }} />)
 
-      const rows = screen.getAllByRole('row')
+        const rows = screen.getAllByRole('row').slice(1)
+        const [emptyMessage] = getNameCellsContent(rows)
 
-      expect(rows.length).toBe(2)   // 2 = header row + empty message row
+        expect(rows.length).toBe(1)
+        expect(emptyMessage).toBe('No data available')
+      })
 
-      const emptyMessageRow = rows[1]
-      const cells = within(emptyMessageRow).getAllByRole('cell')
+      test('renders rows that pass the filter and search', () => {
+        render(<Table collection={ collection } columns={ columns } search='cat' filter={{ 'Family': 'feline' }} />)
 
-      expect(cells[0].textContent).toBe('No data available')
-    })
+        const rows = screen.getAllByRole('row').slice(1)
+        const [cat] = getNameCellsContent(rows)
 
-    test('renders rows that pass the filter and search', () => {
-      render(<Table collection={ collection } columns={ columns } search='cat' filter={{
-          'Family': 'feline'
-        }}
-      />)
+        expect(rows.length).toBe(1)
+        expect(cat).toBe('Cat')
+      })
 
-      const rows = screen.getAllByRole('row')
-      expect(rows.length).toBe(2)   // 2 = header row + data row
+      test('renders empty message if no row passes the filter and search', () => {
+        render(<Table collection={ collection } columns={ columns } search='dog' filter={{ 'Family': 'feline' }} />)
 
-      const filteredRow = rows[1]
-      const cells = within(filteredRow).getAllByRole('cell')
-      expect(cells[0].textContent).toBe('Cat')
-    })
+        const rows = screen.getAllByRole('row').slice(1)
+        const [emptyMessage] = getNameCellsContent(rows)
 
-    test('renders empty message if no row passes the filter and search', () => {
-      render(<Table collection={ collection } columns={ columns } search='dog' filter={{ 'Family': 'feline' }} />)
+        expect(rows.length).toBe(1)
+        expect(emptyMessage).toBe('No data available')
+      })
 
-      const rows = screen.getAllByRole('row')
-      expect(rows.length).toBe(2)   // 2 = header row + empty message row
+      test('renders rows that pass the range filter', () => {
+        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 8, max: 15 } }} />)
 
-      const emptyMessageRow = rows[1]
-      const cells = within(emptyMessageRow).getAllByRole('cell')
+        const rows = screen.getAllByRole('row').slice(1)
 
-      expect(cells[0].textContent).toBe('No data available')
-    })
+        // Names in expected order
+        const [cat, lion] = getNameCellsContent(rows)
 
-    test('renders rows that pass the range filter', () => {
-      render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 8, max: 15 } }} />)
-
-      const rows = screen.getAllByRole('row')
-      expect(rows.length).toBe(3)   // 3 = header row + 2 data rows
-
-      const catRow = rows[1]
-      const lionRow = rows[2]
-
-      const catCells = within(catRow).getAllByRole('cell')
-      const lionCells = within(lionRow).getAllByRole('cell')
-
-      expect(catCells[0].textContent).toBe('Cat')
-      expect(lionCells[0].textContent).toBe('Lion')
-    })
+        expect(rows.length).toBe(2)
+        expect(cat).toBe('Cat')
+        expect(lion).toBe('Lion')
+      })
 
 
-    test('renders rows that pass the range filter, edge cases', () => {
-      render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 10, max: 13 } }} />)
+      test('renders rows that pass the range filter, edge cases', () => {
+        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 10, max: 13 } }} />)
 
-      const rows = screen.getAllByRole('row')
-      expect(rows.length).toBe(3)   // 3 = header row + 2 data rows
+        const rows = screen.getAllByRole('row').slice(1)
 
-      const catRow = rows[1]
-      const lionRow = rows[2]
+        // Names in expected order
+        const [cat, lion] = getNameCellsContent(rows)
 
-      const catCells = within(catRow).getAllByRole('cell')
-      const lionCells = within(lionRow).getAllByRole('cell')
+        expect(rows.length).toBe(2)
+        expect(cat).toBe('Cat')
+        expect(lion).toBe('Lion')
+      })
 
-      expect(catCells[0].textContent).toBe('Cat')
-      expect(lionCells[0].textContent).toBe('Lion')
-    })
+      test('renders empty message if no row passes the range filter', () => {
+        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 18, max: 20 } }} />)
 
-    test('renders empty message if no row passes the range filter', () => {
-      render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 18, max: 20 } }} />)
+        const rows = screen.getAllByRole('row').slice(1)
+        const [emptyMessage] = getNameCellsContent(rows)
 
-      const rows = screen.getAllByRole('row')
-      expect(rows.length).toBe(2)   // 2 = header row + empty message row
+        expect(rows.length).toBe(1)
+        expect(emptyMessage).toBe('No data available')
+      })
 
-      const emptyMessageRow = rows[1]
-      const cells = within(emptyMessageRow).getAllByRole('cell')
+      test('renders rows that pass a min range filter', () => {
+        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 12 } }} />)
 
-      expect(cells[0].textContent).toBe('No data available')
-    })
+        const rows = screen.getAllByRole('row').slice(1)
 
-    test('renders rows that pass a min range filter', () => {
-      render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 12 } }} />)
+        // Names in expected order
+        const [lion, seaLion] = getNameCellsContent(rows)
 
-      const rows = screen.getAllByRole('row')
-      expect(rows.length).toBe(3)   // 2 = header row + 2 data rows
+        expect(rows.length).toBe(2)
+        expect(lion).toBe('Lion')
+        expect(seaLion).toBe('Sea Lion')
+      })
 
-      const lionRows = rows[1]
-      const seaLionRows = rows[2]
+      test('renders empty message if no row passes the min range filter', () => {
+        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 18 } }} />)
 
-      const lionCells = within(lionRows).getAllByRole('cell')
-      const seaLionCells = within(seaLionRows).getAllByRole('cell')
+        const rows = screen.getAllByRole('row').slice(1)
+        const [emptyMessage] = getNameCellsContent(rows)
 
-      expect(lionCells[0].textContent).toBe('Lion')
-      expect(seaLionCells[0].textContent).toBe('Sea Lion')
-    })
+        expect(rows.length).toBe(1)
+        expect(emptyMessage).toBe('No data available')
+      })
 
-    test('renders empty message if no row passes the min range filter', () => {
-      render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 18 } }} />)
+      test('renders rows that pass the max range filter', () => {
+        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { max: 12 } }} />)
 
-      const rows = screen.getAllByRole('row')
-      expect(rows.length).toBe(2)   // 2 = header row + empty message row
+        const rows = screen.getAllByRole('row').slice(1)
 
-      const emptyMessageRow = rows[1]
-      const cells = within(emptyMessageRow).getAllByRole('cell')
+        // Names in expected order
+        const [cat, dog] = getNameCellsContent(rows)
 
-      expect(cells[0].textContent).toBe('No data available')
-    })
+        expect(rows.length).toBe(2)
+        expect(cat).toBe('Cat')
+        expect(dog).toBe('Dog')
+      })
 
-    test('renders rows that pass the max range filter', () => {
-      render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { max: 12 } }} />)
+      test('renders empty message if no row passes the max range filter', () => {
+        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { max: 2 } }} />)
 
-      const rows = screen.getAllByRole('row')
-      expect(rows.length).toBe(3)   // 3 = header row + 2 data rows
+        const rows = screen.getAllByRole('row').slice(1)
+        const [emptyMessage] = getNameCellsContent(rows)
 
-      const catRow = rows[1]
-      const dogRow = rows[2]
+        expect(rows.length).toBe(1)
+        expect(emptyMessage).toBe('No data available')
+      })
 
-      const catCells = within(catRow).getAllByRole('cell')
-      const dogCells = within(dogRow).getAllByRole('cell')
+      test('renders rows that pass the date range filter', () => {
+        const dateFormat = 'dd-MM-yyyy'
 
-      expect(catCells[0].textContent).toBe('Cat')
-      expect(dogCells[0].textContent).toBe('Dog')
-    })
+        render(
+          <Table
+            collection={ collection }
+            columns={ columns }
+            filter={{
+              'Birth': {
+                min: '14-07-2012',
+                max: '14-07-2015',
+                parser: date => parse(date, dateFormat, new Date()).getTime()
+              }}}
+          />)
 
-    test('renders empty message if no row passes the max range filter', () => {
-      render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { max: 2 } }} />)
+        const rows = screen.getAllByRole('row').slice(1)
 
-      const rows = screen.getAllByRole('row')
-      expect(rows.length).toBe(2)   // 2 = header row + empty message row
+        // Names in expected order
+        const [cat, lion] = getNameCellsContent(rows)
 
-      const emptyMessageRow = rows[1]
-      const cells = within(emptyMessageRow).getAllByRole('cell')
+        expect(rows.length).toBe(2)
+        expect(cat).toBe('Cat')
+        expect(lion).toBe('Lion')
+      })
 
-      expect(cells[0].textContent).toBe('No data available')
-    })
+      test('renders rows that pass a range filter, filter and search', () => {
+        render(<Table
+          collection={ collection }
+          columns={ columns }
+          filter={{ 'Age': { min: 8, max: 16 }, 'Family': 'feline' }}
+          search='Lion'
+        />)
 
-    test('renders rows that pass the date range filter', () => {
-      const dateFormat = 'dd-MM-yyyy'
+        const rows = screen.getAllByRole('row').slice(1)
+        const [lion] = getNameCellsContent(rows)
 
-      render(<Table
-        collection={ collection }
-        columns={ columns }
-        filter={{
-          'Birth': {
-            min: '14-07-2012',
-            max: '14-07-2015',
-            parser: date => parse(date, dateFormat, new Date()).getTime()
-        }}}
-      />)
-
-      const rows = screen.getAllByRole('row')
-      expect(rows.length).toBe(3)   // 3 = header row + 2 data rows
-
-      const catRow = rows[1]
-      const lionRow = rows[2]
-
-      const catCells = within(catRow).getAllByRole('cell')
-      const lionCells = within(lionRow).getAllByRole('cell')
-
-      expect(catCells[0].textContent).toBe('Cat')
-      expect(lionCells[0].textContent).toBe('Lion')
-    })
-
-    test('renders rows that pass a range filter, filter and search', () => {
-      render(<Table
-        collection={ collection }
-        columns={ columns }
-        filter={{ 'Age': { min: 8, max: 16 }, 'Family': 'feline' }}
-        search='Lion'
-      />)
-
-      const rows = screen.getAllByRole('row')
-      expect(rows.length).toBe(2)   // 2 = header row + data row
-
-      const filteredRow = rows[1]
-      const cells = within(filteredRow).getAllByRole('cell')
-
-      expect(cells[0].textContent).toBe('Lion')
+        expect(rows.length).toBe(1)
+        expect(lion).toBe('Lion')
+      })
     })
 
     describe('Pagination', () => {
@@ -374,13 +350,11 @@ describe('Table', () => {
         const rows = screen.getAllByRole('row').slice(1)
         expect(rows.length).toBe(2)
 
-        const [cat, dog] = rows
+        // Names in expected order
+        const [cat, dog] = getNameCellsContent()
 
-        const catCells = within(cat).getAllByRole('cell')
-        const dogCells = within(dog).getAllByRole('cell')
-
-        expect(catCells[0].textContent).toBe('Cat')
-        expect(dogCells[0].textContent).toBe('Dog')
+        expect(cat).toBe('Cat')
+        expect(dog).toBe('Dog')
       })
 
       test('render the selected page data', async () => {
@@ -391,14 +365,11 @@ describe('Table', () => {
 
         await userEvent.click(pageNumbers[1])
 
-        const rows = screen.getAllByRole('row').slice(1)
-        const [lion, seaLion] = rows
+        // Names in expected order
+        const [lion, seaLion] = getNameCellsContent()
 
-        const lionCells = within(lion).getAllByRole('cell')
-        const seaLionCells = within(seaLion).getAllByRole('cell')
-
-        expect(lionCells[0].textContent).toBe('Lion')
-        expect(seaLionCells[0].textContent).toBe('Sea Lion')
+        expect(lion).toBe('Lion')
+        expect(seaLion).toBe('Sea Lion')
       })
 
       test('if more than 6 pages, render navigation arrows', () => {
@@ -423,11 +394,10 @@ describe('Table', () => {
         const leftArrow = within(paginationNavigation).getByLabelText('Go to previous page')
         await userEvent.click(leftArrow)
 
-        const row = screen.getAllByRole('row').slice(1)[0]
-        const nameCell = within(row).getAllByRole('cell')[0]
+        const [firstCellName] = getNameCellsContent()
         const expectedPage = 3
 
-        expect(nameCell.textContent).toBe(longCollection[expectedPage].name)
+        expect(firstCellName).toBe(longCollection[expectedPage].name)
       })
 
       test('left arrow navigates to next page', async () => {
@@ -438,11 +408,10 @@ describe('Table', () => {
         const rightArrow = within(paginationNavigation).getByLabelText('Go to next page')
         await userEvent.click(rightArrow)
 
-        const row = screen.getAllByRole('row').slice(1)[0]
-        const nameCell = within(row).getAllByRole('cell')[0]
+        const [firstCellName] = getNameCellsContent()
         const expectedPage = 5
 
-        expect(nameCell.textContent).toBe(longCollection[expectedPage].name)
+        expect(firstCellName).toBe(longCollection[expectedPage].name)
       })
 
       test('has select for choosing items per page', () => {
@@ -474,18 +443,13 @@ describe('Table', () => {
         const rows = screen.getAllByRole('row').slice(1)
         expect(rows.length).toBe(collection.length)
 
-        // Rows in expected order
-        const [dog, cat, lion, seaLion] = rows
+        // Names in expected order
+        const [dog, cat, lion, seaLion] = getNameCellsContent(rows)
 
-        const catNameCell = within(cat).getAllByRole('cell')[0]
-        const lionNameCell = within(lion).getAllByRole('cell')[0]
-        const dogNameCell = within(dog).getAllByRole('cell')[0]
-        const seaLionNameCell = within(seaLion).getAllByRole('cell')[0]
-
-        expect(catNameCell.textContent).toBe('Cat')
-        expect(lionNameCell.textContent).toBe('Lion')
-        expect(dogNameCell.textContent).toBe('Dog')
-        expect(seaLionNameCell.textContent).toBe('Sea Lion')
+        expect(dog).toBe('Dog')
+        expect(cat).toBe('Cat')
+        expect(lion).toBe('Lion')
+        expect(seaLion).toBe('Sea Lion')
       })
 
       test('sorts rows descending', () => {
@@ -494,18 +458,13 @@ describe('Table', () => {
         const rows = screen.getAllByRole('row').slice(1)
         expect(rows.length).toBe(collection.length)
 
-        // Rows in expected order
-        const [seaLion, cat, lion, dog] = rows
+        // Names in expected order
+        const [seaLion, cat, lion, dog] = getNameCellsContent(rows)
 
-        const catNameCell = within(cat).getAllByRole('cell')[0]
-        const lionNameCell = within(lion).getAllByRole('cell')[0]
-        const dogNameCell = within(dog).getAllByRole('cell')[0]
-        const seaLionNameCell = within(seaLion).getAllByRole('cell')[0]
-
-        expect(catNameCell.textContent).toBe('Cat')
-        expect(lionNameCell.textContent).toBe('Lion')
-        expect(dogNameCell.textContent).toBe('Dog')
-        expect(seaLionNameCell.textContent).toBe('Sea Lion')
+        expect(cat).toBe('Cat')
+        expect(lion).toBe('Lion')
+        expect(dog).toBe('Dog')
+        expect(seaLion).toBe('Sea Lion')
       })
 
       test('sorts rows that pass a range filter, filter and search', () => {
@@ -520,14 +479,11 @@ describe('Table', () => {
         const rows = screen.getAllByRole('row').slice(1)
         expect(rows.length).toBe(2)
 
-        // Rows in expected order
-        const [seaLion, lion] = rows
+        // Names in expected order
+        const [seaLion, lion] = getNameCellsContent(rows)
 
-        const seaLionCells = within(seaLion).getAllByRole('cell')
-        const lionCells = within(lion).getAllByRole('cell')
-
-        expect(lionCells[0].textContent).toBe('Lion')
-        expect(seaLionCells[0].textContent).toBe('Sea Lion')
+        expect(lion).toBe('Lion')
+        expect(seaLion).toBe('Sea Lion')
       })
 
       test('sorts a filtered, paginated collection', () => {
@@ -536,14 +492,11 @@ describe('Table', () => {
         const rows = screen.getAllByRole('row').slice(1)
         expect(rows.length).toBe(2)
 
-        // Rows in expected order
-        const [dog, cat] = rows
+        // Names in expected order
+        const [dog, cat] = getNameCellsContent(rows)
 
-        const dogCells = within(dog).getAllByRole('cell')
-        const catCells = within(cat).getAllByRole('cell')
-
-        expect(dogCells[0].textContent).toBe('Dog')
-        expect(catCells[0].textContent).toBe('Cat')
+        expect(dog).toBe('Dog')
+        expect(cat).toBe('Cat')
       })
 
       test('sorts the table by the clicked header', async () => {
@@ -552,20 +505,13 @@ describe('Table', () => {
         const nameHeader = screen.getAllByRole('columnheader')[0]
         await userEvent.click(nameHeader)
 
-        const rows = screen.getAllByRole('row').slice(1)
+        // Names in expected order
+        const [cat, dog, lion, seaLion] = getNameCellsContent()
 
-        // Rows in expected order
-        const [cat, dog, lion, seaLion] = rows
-
-        const catNameCell = within(cat).getAllByRole('cell')[0]
-        const dogNameCell = within(dog).getAllByRole('cell')[0]
-        const lionNameCell = within(lion).getAllByRole('cell')[0]
-        const seaLionNameCell = within(seaLion).getAllByRole('cell')[0]
-
-        expect(catNameCell.textContent).toBe('Cat')
-        expect(dogNameCell.textContent).toBe('Dog')
-        expect(lionNameCell.textContent).toBe('Lion')
-        expect(seaLionNameCell.textContent).toBe('Sea Lion')
+        expect(cat).toBe('Cat')
+        expect(dog).toBe('Dog')
+        expect(lion).toBe('Lion')
+        expect(seaLion).toBe('Sea Lion')
       })
 
       test('toggles sort direction when clicking the sorting header', async () => {
@@ -574,10 +520,8 @@ describe('Table', () => {
         const familyHeader = screen.getAllByRole('columnheader')[1]
         await userEvent.click(familyHeader)
 
-        const rows = screen.getAllByRole('row').slice(1)
-
-        // Rows in expected order
-        const [seaLion, cat, lion, dog] = getNameCellsContent(rows)
+        // Names in expected order
+        const [seaLion, cat, lion, dog] = getNameCellsContent()
 
         expect(cat).toBe('Cat')
         expect(dog).toBe('Dog')
