@@ -28,7 +28,7 @@ describe('Table', () => {
     { id: 1, name: 'Cat', family: 'Feline', type: 'Pet', age: 10, birth: '2015-07-14' },
     { id: 2, name: 'Dog', family: 'Canine', type: 'Pet', age: 5, birth: '2020-07-14' },
     { id: 3, name: 'Lion', family: 'Feline', type: 'Wild', age: 13, birth: '2012-07-14' },
-    { id: 4, name: 'Sea Lion', family: 'Seals', type: 'Wild', age: 16, birth: '2009-07-14' },
+    { id: 4, name: 'Sea Lion', family: 'Seals', type: 'Wild', age: 16, birth: '2009-07-14' }
   ]
 
   const longCollection: TestData[] = [
@@ -157,19 +157,6 @@ describe('Table', () => {
         expect(lion).toBe('Lion')
       })
 
-      test('renders empty message if no row passes the filter', () => {
-        render(<Table collection={ collection } columns={ columns } filter={{
-          'Family': 'feline',
-          'Name': 'dog',
-        }} />)
-
-        const rows = screen.getAllByRole('row').slice(1)
-        const [emptyMessage] = getNameCellsContent(rows)
-
-        expect(rows.length).toBe(1)
-        expect(emptyMessage).toBe('No data available')
-      })
-
       test('renders rows that pass the filter and search', () => {
         render(<Table collection={ collection } columns={ columns } search='cat' filter={{ 'Family': 'feline' }} />)
 
@@ -178,16 +165,6 @@ describe('Table', () => {
 
         expect(rows.length).toBe(1)
         expect(cat).toBe('Cat')
-      })
-
-      test('renders empty message if no row passes the filter and search', () => {
-        render(<Table collection={ collection } columns={ columns } search='dog' filter={{ 'Family': 'feline' }} />)
-
-        const rows = screen.getAllByRole('row').slice(1)
-        const [emptyMessage] = getNameCellsContent(rows)
-
-        expect(rows.length).toBe(1)
-        expect(emptyMessage).toBe('No data available')
       })
 
       test('renders rows that pass the range filter', () => {
@@ -217,16 +194,6 @@ describe('Table', () => {
         expect(lion).toBe('Lion')
       })
 
-      test('renders empty message if no row passes the range filter', () => {
-        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 18, max: 20 } }} />)
-
-        const rows = screen.getAllByRole('row').slice(1)
-        const [emptyMessage] = getNameCellsContent(rows)
-
-        expect(rows.length).toBe(1)
-        expect(emptyMessage).toBe('No data available')
-      })
-
       test('renders rows that pass a min range filter', () => {
         render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 12 } }} />)
 
@@ -240,8 +207,24 @@ describe('Table', () => {
         expect(seaLion).toBe('Sea Lion')
       })
 
-      test('renders empty message if no row passes the min range filter', () => {
-        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 18 } }} />)
+      test.each([
+        { 'Age': { min: 18 } },
+        { 'Age': { max: 2 } },
+        { 'Age': { min: 18, max: 20 } },
+        { 'Family': 'feline', 'Name': 'dog' }
+      ])
+      ('renders empty message if no row passes the filter', noPassFilter => {
+        render(<Table collection={ collection } columns={ columns } filter={ noPassFilter as { [column: string]: any } } />)
+
+        const rows = screen.getAllByRole('row').slice(1)
+        const [emptyMessage] = getNameCellsContent(rows)
+
+        expect(rows.length).toBe(1)
+        expect(emptyMessage).toBe('No data available')
+      })
+
+      test('renders empty message if no row passes the filter and search', () => {
+        render(<Table collection={ collection } columns={ columns } search='dog' filter={{ 'Family': 'feline' }} />)
 
         const rows = screen.getAllByRole('row').slice(1)
         const [emptyMessage] = getNameCellsContent(rows)
@@ -261,16 +244,6 @@ describe('Table', () => {
         expect(rows.length).toBe(2)
         expect(cat).toBe('Cat')
         expect(dog).toBe('Dog')
-      })
-
-      test('renders empty message if no row passes the max range filter', () => {
-        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { max: 2 } }} />)
-
-        const rows = screen.getAllByRole('row').slice(1)
-        const [emptyMessage] = getNameCellsContent(rows)
-
-        expect(rows.length).toBe(1)
-        expect(emptyMessage).toBe('No data available')
       })
 
       test('renders rows that pass the date range filter', () => {
@@ -419,10 +392,10 @@ describe('Table', () => {
         const rightArrow = within(paginationNavigation).getByLabelText('Go to next page')
         await userEvent.click(rightArrow)
 
-        const [firstCellName] = getNameCellsContent()
+        const [cellName] = getNameCellsContent()
         const expectedPage = 5
 
-        expect(firstCellName).toBe(longCollection[expectedPage].name)
+        expect(cellName).toBe(longCollection[expectedPage].name)
       })
 
       test('has select for choosing items per page', () => {
@@ -524,6 +497,19 @@ describe('Table', () => {
         expect(cat).toBe('Cat')
         expect(lion).toBe('Lion')
         expect(seaLion).toBe('Sea Lion')
+      })
+
+      test.each(['asc', 'desc'])
+      ('sorts invalid dates in last positions', sortDirection=> {
+        render(<Table
+          collection={ [...collection, { id: 5, name: 'Invalid', family: 'x', type: 'x', age: 0, birth: 'invalid' }] }
+          columns={ columns }
+          sort={{ by: 'birth', direction: sortDirection as ('asc' | 'desc') }}
+        />)
+
+        // Names in expected order
+        const [_animal1, _animal2, _animal3, _animal4, invalid] = getNameCellsContent()
+        expect(invalid).toBe('Invalid')
       })
 
       test('sorts rows that pass a range filter, filter and search', () => {
