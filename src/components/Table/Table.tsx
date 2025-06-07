@@ -2,7 +2,7 @@ import {isValidElement, ReactNode, useMemo, useState} from 'react'
 import {Entity, FilterRange, TableColumn, TableFilter, TableProps, TableSort} from './types/types.ts'
 
 const Table = <T extends Entity>(
-  {
+{
   collection,
   columns,
   search,
@@ -124,7 +124,6 @@ const extractValue = (node: ReactNode): string => {
   if (Array.isArray(node))
     return node.map(extractValue).join('')
 
-
   if (isValidElement<{ children?: ReactNode }>(node))
     return extractValue(node.props.children)
 
@@ -145,11 +144,11 @@ const applySearchAndFilter = <T extends Entity>(
   let passesSearch = !search
 
   for (const column of columns) {
-    const value = extractValue(column.data(item)).toLowerCase()
+    const value = extractValue(column.data(item))
     const filterValue = filter?.[column.name]
 
     passesFilter = passesFilter && (!filterValue || evaluateFilter(filterValue, value))
-    passesSearch = passesSearch || !search || value.includes(search.toLowerCase())
+    passesSearch = passesSearch || !search || value.toLowerCase().includes(search.toLowerCase())
   }
 
   return passesFilter && passesSearch

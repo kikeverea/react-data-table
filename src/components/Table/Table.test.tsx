@@ -63,11 +63,13 @@ describe('Table', () => {
   }
 
   const getNameCellsContent = (collection?: HTMLElement[]) => {
+    const nameCellIndex = 0
+
     const rows = collection
       ? collection
       : screen.getAllByRole('row').slice(1)   // rows excluding the header row
 
-    return rows.map(row => within(row).getAllByRole('cell')[0].textContent)
+    return rows.map(row => within(row).getAllByRole('cell')[nameCellIndex].textContent)
   }
 
   describe('Without data', () => {
