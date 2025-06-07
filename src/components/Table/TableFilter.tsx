@@ -19,7 +19,7 @@ const TableFilter = ({ filter, onFilterValueChanged }: TableFilterProps) => {
                         name='min'
                         type={ value.type === 'date' ? 'date' : 'text' }
                         value= { value.min }
-                        onChange= { (e) => onFilterValueChanged(columnName, { min: e.currentTarget.value }) }
+                        onChange= { (e) => onFilterValueChanged(columnName, { min: parseFloat(e.currentTarget.value) }) }
                       />
                       <label htmlFor={ `${columnName.toLowerCase()}-max` }>Max</label>
                       <input
@@ -27,7 +27,7 @@ const TableFilter = ({ filter, onFilterValueChanged }: TableFilterProps) => {
                         name='max'
                         type={ value.type === 'date' ? 'date' : 'text' }
                         value={ value.max }
-                        onChange={ (e) => onFilterValueChanged(columnName, { max: e.currentTarget.value }) }
+                        onChange={ (e) => onFilterValueChanged(columnName, { max: parseFloat(e.currentTarget.value) }) }
                       />
                     </>
                   : Object.entries(value).map(([valueName, value]) =>

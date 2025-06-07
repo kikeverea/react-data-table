@@ -45,6 +45,6 @@ export type TableFilterProps = {
   filter: TableFilterProp,
   onFilterValueChanged: (
     columnName: string,
-    value: { name?: string, checked?: boolean, min?: string | number, max?: string | number }
+    value: { name?: string, checked?: boolean, min?: number, max?: number }
   ) => void
 }
