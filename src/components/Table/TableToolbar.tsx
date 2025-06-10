@@ -1,7 +1,6 @@
-import {Dictionary, FilterRange, TableFilter as TableFilterType, TableFilterProp, TableToolbarProps} from './types/types.ts'
-import {useMemo, useRef, useState} from 'react'
-import TableFilter from "./TableFilter.tsx";
-import useFilter from "./hooks/useFilter.ts";
+import { FilterRange, TableFilter as TableFilterType, TableToolbarProps} from './types/types.ts'
+import TableFilter from './TableFilter.tsx'
+import useFilter from './hooks/useFilter.ts'
 
 const TableToolbar = (
 {

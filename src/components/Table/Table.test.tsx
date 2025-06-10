@@ -5,7 +5,7 @@ import { TableColumn } from './types/types.ts'
 
 import { parse } from 'date-fns'
 
-type TestData = {
+export type TestData = {
   id: number,
   name: string,
   family: string,

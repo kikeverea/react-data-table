@@ -26,8 +26,8 @@ const useFilter = (columns?: [string, 'default' | 'range' | undefined][], collec
   return [filter, setFilter]
 }
 
-const extractFilter = (
-  columns?: [string, 'default' | 'range' | undefined][],
+export const extractFilter = (
+  columns?:  [string | [string, ('default' | 'range')?]],
   collection?: Dictionary<string|number>[],
   previousState?: TableFilterProp
 ): TableFilterProp | {} =>

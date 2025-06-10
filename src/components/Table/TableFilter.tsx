@@ -3,14 +3,18 @@ import { FilterRange, TableFilterProps } from './types/types.ts'
 const isRange = (value: any): value is FilterRange => value.min != undefined || value.max != undefined
 
 const TableFilter = ({ filter, onFilterValueChanged }: TableFilterProps) => {
+  console.log('filter', filter)
+
   return (
     <div role='dialog' aria-modal="true" aria-label="table filter">
       { filter
         ? Object.entries(filter).map(([columnName, value]) => {
 
+          console.log(columnName)
+
           return (
             <fieldset key={ columnName }>
-              <legend>{ columnName }</legend>
+              <legend aria-label={ columnName }>{ columnName }</legend>
               { isRange(value)
                   ? <>
                       <label htmlFor={ `${columnName.toLowerCase()}-min` }>Min</label>
