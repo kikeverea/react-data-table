@@ -1,4 +1,4 @@
-import {FilterColumns, TableFilterProp} from '../types/types.ts'
+import {FilterColumns, FilterStructure} from '../types/types.ts'
 import { extractFilter } from './useFilter'
 import {TestData} from '../Table.test.tsx'
 
@@ -16,7 +16,7 @@ const longCollection: TestData[] = [
 ]
 
 test('creates a correct filter structure', () => {
-  const expected: TableFilterProp = {
+  const expected: FilterStructure = {
     'family': {
       'Feline': false,
       'Canine': false,
@@ -28,12 +28,12 @@ test('creates a correct filter structure', () => {
       'Pet': false,
       'Wild': false,
     },
-    'age': { min: undefined, max: undefined, type: 'number' },
-    'birth': { min: undefined, max: undefined, type: 'date' },
+    'age': { type: 'number', range: true },
+    'birth': { type: 'date', range: true },
   }
 
   const filter = extractFilter(columns, longCollection)
 
-  expect(Object.keys(filter)).toHaveLength(4)
+  expect(Object.keys(filter)).toHaveLength(Object.keys(expected).length)
   expect(filter).toEqual(expected)
 })

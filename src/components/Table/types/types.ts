@@ -3,16 +3,7 @@ import { ReactNode } from 'react'
 export type Dictionary<T> = { [key: string]: T }
 export type Entity = { id: number | string }
 
-export type FilterRange = {
-  min?: number | string,
-  max?: number | string,
-  type: 'number' | 'date',
-  parser?: (value: string) => number
-}
-
-export type TableFilter = Dictionary<string[] | FilterRange>
-
-export type TableSort = { by: string, direction?: 'asc' | 'desc' }
+/************ Table ***************/
 
 export type TableColumn<T extends Entity> = {
   name: string,
@@ -31,6 +22,14 @@ export type TableProps<T extends Entity> = {
   page?: number,
 }
 
+
+/************ Sort ***************/
+
+export type TableSort = { by: string, direction?: 'asc' | 'desc' }
+
+
+/************ Toolbar ***************/
+
 export type TableToolbarProps = {
   collection?: Dictionary<string|number>[]
   filter?: FilterColumns,
@@ -40,14 +39,29 @@ export type TableToolbarProps = {
   onFilterChange?: (filter: TableFilter) => void,
 }
 
-export type TableFilterProp = Dictionary<Dictionary<boolean> | FilterRange>
+
+/************ Filter ***************/
+
+export type FilterColumns = (string | [string, 'range', ('number' | 'date')])[]
+
+export type FilterStructure = Dictionary<Dictionary<boolean> | FilterRange>
+
+export type TableFilter = Dictionary<string[] | FilterRange>
+
+export type FilterRange = {
+  min?: number | string,
+  max?: number | string,
+  type: 'number' | 'date',
+  parser?: (value: string) => number,
+  range: true
+}
+
+export type RangeColumn = [string, 'range', ('number' | 'date')]
 
 export type TableFilterProps = {
-  filter: TableFilterProp,
+  filter: FilterStructure,
   onFilterValueChanged: (
     columnName: string,
     value: { name?: string, checked?: boolean, min?: number, max?: number }
   ) => void
 }
-
-export type FilterColumns = (string | [string, 'range', ('number' | 'date')])[]

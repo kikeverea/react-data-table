@@ -1,11 +1,11 @@
 import {render, screen, within} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { TableFilterProp } from './types/types.ts'
+import { FilterStructure } from './types/types.ts'
 import TableFilter from './TableFilter.tsx'
 
 describe('Table Filter', () => {
 
-  const filter: TableFilterProp = {
+  const filter: FilterStructure = {
     'Family': {
       'Feline': false,
       'Canine': true,
@@ -17,8 +17,8 @@ describe('Table Filter', () => {
       'Pet': true,
       'Wild': false,
     },
-    'Age': { min: 5, max: 8, type: 'number' },
-    'Birth': { min: '2019-03-22', max: '2021-03-22', type: 'date' },
+    'Age': { min: 5, max: 8, type: 'number', range: true },
+    'Birth': { min: '2019-03-22', max: '2021-03-22', type: 'date', range: true }
   }
 
   const onFilterChangeMock = vi.fn()

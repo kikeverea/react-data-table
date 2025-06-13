@@ -1,22 +1,23 @@
-import { useMemo, useRef, useState } from 'react'
-import {Dictionary, FilterColumns, FilterRange, TableFilterProp} from '../types/types.ts'
+import {Dispatch, SetStateAction, useMemo, useRef, useState} from 'react'
+import {Dictionary, FilterColumns, FilterRange, FilterStructure, RangeColumn} from '../types/types.ts'
 
 type UseFilterReturn = [
-  TableFilterProp | null | undefined,
-  React.Dispatch<React.SetStateAction<TableFilterProp | null | undefined>>
+  FilterStructure | null | undefined,
+  Dispatch<SetStateAction<FilterStructure | null | undefined>>
 ]
 
 const useFilter = (columns?: FilterColumns, collection?: Dictionary<string|number>[]): UseFilterReturn => {
+
   const filterVersion = useRef<number>(0)
 
-  const [filterStructure, version] = useMemo<[TableFilterProp | {}, number]>((): [TableFilterProp | {}, number] =>
+  const [filterStructure, version] = useMemo<[FilterStructure | {}, number]>((): [FilterStructure | {}, number] =>
       [
         extractFilter(columns, collection),
         filterVersion.current + 1
       ],
     [columns, collection])
 
-  const [filter, setFilter] = useState<TableFilterProp | null>()
+  const [filter, setFilter] = useState<FilterStructure | null>()
 
   if (filterVersion.current != version) {
     setFilter(filterStructure)
@@ -26,43 +27,73 @@ const useFilter = (columns?: FilterColumns, collection?: Dictionary<string|numbe
   return [filter, setFilter]
 }
 
-const isRange = (type: any, _param: any): _param is FilterRange => type == 'range'
-
 export const extractFilter = (
   columns?: FilterColumns,
   collection?: Dictionary<string|number>[],
-  previousState?: TableFilterProp
-): TableFilterProp | {} =>
-{
+  previousState?: FilterStructure
+)
+: FilterStructure | {} => {
 
   if (!collection?.length || !columns?.length)
     return {}
 
-  return columns.reduce((filter: TableFilterProp, column): TableFilterProp => {
+  return columns.reduce((filter: FilterStructure, column): FilterStructure => {
 
-    const [columnName, range, type] = Array.isArray(column) ? column : [column, 'default']
-    const filterValue = filter[columnName] || {}
-    const previousStateParameter = previousState && previousState[columnName]
-
-    if (isRange(range, filterValue) || isRange(range, previousStateParameter))
-      filter[columnName] = previousState ? previousState[columnName] : { min: undefined, max: undefined, type: type }
-
+    if (isRangeColumn(column)) {
+      const [columnName] = column
+      filter[columnName] = extractRangeFilter(column, previousState)
+    }
     else {
-      collection.forEach(entity => {
-        if (!Object.keys(filterValue).length)
-          filter[columnName] = filterValue
-
-        const valueName = entity[columnName] && String(entity[columnName])
-
-        if (valueName)
-          filterValue[valueName] = previousStateParameter ? previousStateParameter[valueName] : false
-        else
-          console.warn(`Could not find column ${columnName}. Available columns: ${Object.keys(entity).join(', ')}`)
-      })
+      // noinspection UnnecessaryLocalVariableJS
+      const columnName = column
+      filter[columnName] = extractBooleanFilter(column, collection, previousState)
     }
 
     return filter
   }, {})
+}
+
+const extractRangeFilter = (column: RangeColumn, previousState?: FilterStructure): FilterRange => {
+  const [columnName, _range, type] = column
+  const previousRange = previousState && previousState[columnName]
+
+  assertFilterRange(previousRange)
+
+  return previousRange || { type: type, range: true }
+}
+
+const extractBooleanFilter = (column: string, collection: Dictionary<string|number>[], previousState?: FilterStructure): Dictionary<boolean> => {
+  const columnName = column
+  const previousBooleanSet = previousState && previousState[columnName]
+
+  assertNotFilterRange(previousBooleanSet)
+
+  return collection.reduce((filterValue, entity) => {
+
+    const value = String(entity[columnName] || '').trim()
+
+    if (value) {
+      const previousFilterValue = previousBooleanSet && previousBooleanSet[value]
+      filterValue[value] = previousFilterValue || false
+    } else
+      console.warn(`Could not find column ${columnName}. Available columns: ${Object.keys(entity).join(', ')}`)
+
+    return filterValue
+  },
+  {} as Dictionary<boolean>)
+}
+
+const isRangeColumn = (column: string | any[]): column is RangeColumn =>
+  Array.isArray(column) && column[1] === 'range'
+
+function assertNotFilterRange(value?: { range?: boolean }): asserts value is Dictionary<boolean> {
+  if (value?.range)
+    throw new Error('Value is a FilterRange')
+}
+
+function assertFilterRange(value?: { range?: boolean }): asserts value is FilterRange {
+  if (value && !value.range)
+    throw new Error('Value is not FilterRange')
 }
 
 export default useFilter
