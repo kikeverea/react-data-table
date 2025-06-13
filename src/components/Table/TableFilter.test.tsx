@@ -17,8 +17,8 @@ describe('Table Filter', () => {
       'Pet': true,
       'Wild': false,
     },
-    'Age': { min: 5, max: 8 },
-    'Birth': { min: '2019-03-22', max: '2021-03-22' },
+    'Age': { min: 5, max: 8, type: 'number' },
+    'Birth': { min: '2019-03-22', max: '2021-03-22', type: 'date' },
   }
 
   const onFilterChangeMock = vi.fn()
@@ -63,26 +63,18 @@ describe('Table Filter', () => {
   })
 
   test('renders number ranges', () => {
+    const min = screen.getByLabelText('age min') as HTMLInputElement
+    const max = screen.getByLabelText('age max') as HTMLInputElement
 
-    const [min, max] = screen.getAllByRole('textbox') as HTMLInputElement[]
-
-    expect(min).toBeDefined()
-    expect(min.ariaLabel).toBe('age-min')
     expect(min.value).toBe('5')
-
-    expect(max).toBeDefined()
-    expect(max.ariaLabel).toBe('age-max')
     expect(max.value).toBe('8')
   })
 
   test('renders date ranges', () => {
-    const min = screen.getByLabelText('birth-min') as HTMLInputElement
-    const max = screen.getByLabelText('birth-max') as HTMLInputElement
+    const min = screen.getByLabelText('birth min') as HTMLInputElement
+    const max = screen.getByLabelText('birth max') as HTMLInputElement
 
-    expect(min).toBeDefined()
     expect(min.value).toBe('2019-03-22')
-
-    expect(max).toBeDefined()
     expect(max.value).toBe('2021-03-22')
   })
 

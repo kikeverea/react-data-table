@@ -7,7 +7,7 @@ const TableToolbar = (
   collection,
   filter: filterColumns,
   showSearch=true,
-  showFilter=true,
+  showFilter=!!filterColumns?.length,
   onSearchChange=() => {},
   onFilterChange=() => {}
 }: TableToolbarProps) => {
@@ -53,7 +53,7 @@ const TableToolbar = (
   return (
     <div>
       { showSearch &&
-        <input type='text' onInput={ e => onSearchChange(e.currentTarget.value) }/>
+        <input type='text' onInput={ e => onSearchChange(e.currentTarget.value) } aria-label='table search'/>
       }
       { showFilter && filter?.length &&
         <TableFilter filter={ filter } onFilterValueChanged={ updateFilter } />

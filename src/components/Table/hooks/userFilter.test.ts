@@ -1,15 +1,9 @@
-import {TableColumn, TableFilterProp} from '../types/types.ts'
-import { TestData } from '../Table.test.tsx'
+import {FilterColumns, TableFilterProp} from '../types/types.ts'
 import { extractFilter } from './useFilter'
+import {TestData} from '../Table.test.tsx'
 
 
-const columns: TableColumn<TestData>[] = [
-  { name: 'Name', data: item => `${item.name}`},
-  { name: 'Family', data: item => `${item.family}`},
-  { name: 'Type', data: item => `${item.type}`},
-  { name: 'Age', data: item => `${item.age}`, type: 'number' },
-  { name: 'Birth', data: item => `${item.birth}`, type: 'date' },
-]
+const columns: FilterColumns = [ 'family', 'type', ['age', 'range', 'number'], ['birth', 'range', 'date'] ]
 
 const longCollection: TestData[] = [
   { id: 1, name: 'Cat', family: 'Feline', type: 'Pet', age: 10, birth: '2015-07-14' },
@@ -22,26 +16,24 @@ const longCollection: TestData[] = [
 ]
 
 test('creates a correct filter structure', () => {
-
   const expected: TableFilterProp = {
-    'Family': {
+    'family': {
       'Feline': false,
-      'Canine': true,
-      'Seals': true,
-      'Fish': true,
+      'Canine': false,
+      'Seals': false,
+      'Fish': false,
       'Primate': false,
     },
-    'Type': {
-      'Pet': true,
+    'type': {
+      'Pet': false,
       'Wild': false,
     },
-    'Age': { min: 5, max: 8 },
-    'Birth': { min: '2019-03-22', max: '2021-03-22' },
+    'age': { min: undefined, max: undefined, type: 'number' },
+    'birth': { min: undefined, max: undefined, type: 'date' },
   }
 
-  const filter = extractFilter([['family']], longCollection)
+  const filter = extractFilter(columns, longCollection)
 
-  // const [family, type, age, birth] = Object.keys(filter)
-
+  expect(Object.keys(filter)).toHaveLength(4)
   expect(filter).toEqual(expected)
 })

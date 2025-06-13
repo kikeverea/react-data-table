@@ -1,12 +1,12 @@
-import {useMemo, useRef, useState} from "react";
-import {Dictionary, FilterRange, TableFilterProp} from "../types/types.ts";
+import { useMemo, useRef, useState } from 'react'
+import {Dictionary, FilterColumns, FilterRange, TableFilterProp} from '../types/types.ts'
 
 type UseFilterReturn = [
   TableFilterProp | null | undefined,
   React.Dispatch<React.SetStateAction<TableFilterProp | null | undefined>>
 ]
 
-const useFilter = (columns?: [string, 'default' | 'range' | undefined][], collection?: Dictionary<string|number>[]): UseFilterReturn => {
+const useFilter = (columns?: FilterColumns, collection?: Dictionary<string|number>[]): UseFilterReturn => {
   const filterVersion = useRef<number>(0)
 
   const [filterStructure, version] = useMemo<[TableFilterProp | {}, number]>((): [TableFilterProp | {}, number] =>
@@ -26,8 +26,10 @@ const useFilter = (columns?: [string, 'default' | 'range' | undefined][], collec
   return [filter, setFilter]
 }
 
+const isRange = (type: any, _param: any): _param is FilterRange => type == 'range'
+
 export const extractFilter = (
-  columns?:  [string | [string, ('default' | 'range')?]],
+  columns?: FilterColumns,
   collection?: Dictionary<string|number>[],
   previousState?: TableFilterProp
 ): TableFilterProp | {} =>
@@ -38,19 +40,24 @@ export const extractFilter = (
 
   return columns.reduce((filter: TableFilterProp, column): TableFilterProp => {
 
-    const isRange = (type: any, _param: any): _param is FilterRange => type == 'range'
-
-    const [columnName, type='default'] = column
-    const filterParameter = filter[columnName]
+    const [columnName, range, type] = Array.isArray(column) ? column : [column, 'default']
+    const filterValue = filter[columnName] || {}
     const previousStateParameter = previousState && previousState[columnName]
 
-    if (isRange(type, filterParameter) || isRange(type, previousStateParameter))
-      filter[columnName] = previousState ? previousState[columnName] : { min: undefined, max: undefined }
+    if (isRange(range, filterValue) || isRange(range, previousStateParameter))
+      filter[columnName] = previousState ? previousState[columnName] : { min: undefined, max: undefined, type: type }
 
     else {
       collection.forEach(entity => {
-        const valueName = String(entity[columnName])
-        filterParameter[valueName] = previousStateParameter ? previousStateParameter[valueName] : false
+        if (!Object.keys(filterValue).length)
+          filter[columnName] = filterValue
+
+        const valueName = entity[columnName] && String(entity[columnName])
+
+        if (valueName)
+          filterValue[valueName] = previousStateParameter ? previousStateParameter[valueName] : false
+        else
+          console.warn(`Could not find column ${columnName}. Available columns: ${Object.keys(entity).join(', ')}`)
       })
     }
 

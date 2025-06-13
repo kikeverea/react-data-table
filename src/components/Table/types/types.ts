@@ -6,12 +6,11 @@ export type Entity = { id: number | string }
 export type FilterRange = {
   min?: number | string,
   max?: number | string,
-  type?: 'number' | 'date',
+  type: 'number' | 'date',
   parser?: (value: string) => number
 }
 
 export type TableFilter = Dictionary<string[] | FilterRange>
-export type TableFilterProp = Dictionary<Dictionary<boolean> | FilterRange>
 
 export type TableSort = { by: string, direction?: 'asc' | 'desc' }
 
@@ -34,12 +33,14 @@ export type TableProps<T extends Entity> = {
 
 export type TableToolbarProps = {
   collection?: Dictionary<string|number>[]
-  filter?: [string, 'range' | 'default' | undefined][],
+  filter?: FilterColumns,
   showSearch?: boolean,
   showFilter?: boolean,
   onSearchChange?: (search: string) => void,
   onFilterChange?: (filter: TableFilter) => void,
 }
+
+export type TableFilterProp = Dictionary<Dictionary<boolean> | FilterRange>
 
 export type TableFilterProps = {
   filter: TableFilterProp,
@@ -48,3 +49,5 @@ export type TableFilterProps = {
     value: { name?: string, checked?: boolean, min?: number, max?: number }
   ) => void
 }
+
+export type FilterColumns = (string | [string, 'range', ('number' | 'date')])[]
