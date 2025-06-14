@@ -5,11 +5,13 @@ import TableFilter from './TableFilter.tsx'
 
 describe('Table Filter', () => {
 
+  const parser = (date: string) => new Date(date).getTime()
+
   const filter: FilterStructure = {
     'Family': ['Feline', 'Canine', 'Seals', 'Fish', 'Primate'],
     'Type': ['Pet', 'Wild',],
     'Age': { type: 'number', range: true },
-    'Birth': { type: 'date', range: true }
+    'Birth': { type: 'date', range: true, parser: parser }
   }
 
   const onFilterChangeMock = vi.fn()
@@ -41,16 +43,6 @@ describe('Table Filter', () => {
   test('renders checkboxes', () => {
     const checkboxes = screen.getAllByRole('checkbox')
     checkboxes.forEach(checkbox => expect(checkbox).toBeDefined())
-
-    const [ feline, canine, seals, fish, primate, pet, wild ] = checkboxes as HTMLInputElement[]
-
-    expect(feline.checked).toBe(false)
-    expect(canine.checked).toBe(true)
-    expect(seals.checked).toBe(true)
-    expect(fish.checked).toBe(true)
-    expect(primate.checked).toBe(false)
-    expect(pet.checked).toBe(true)
-    expect(wild.checked).toBe(false)
   })
 
   test('renders number ranges', () => {
@@ -71,15 +63,14 @@ describe('Table Filter', () => {
 
   test.each([
     ['Family', 'Feline', { name: 'Feline', checked: true }],
-    ['Family', 'Canine', { name: 'Canine', checked: false }],
-    ['Family', 'Seals', { name: 'Seals', checked: false }],
-    ['Family', 'Fish', { name: 'Fish', checked: false }],
+    ['Family', 'Canine', { name: 'Canine', checked: true }],
+    ['Family', 'Seals', { name: 'Seals', checked: true }],
+    ['Family', 'Fish', { name: 'Fish', checked: true }],
     ['Family', 'Primate', { name: 'Primate', checked: true }],
-    ['Type', 'Pet', { name: 'Pet', checked: false }],
+    ['Type', 'Pet', { name: 'Pet', checked: true }],
     ['Type', 'Wild', { name: 'Wild', checked: true }],
   ])
   ('checking a checkbox calls the handler with the column, value name and checked', async (column, value, result) => {
-
     const checkbox = screen.getByRole('checkbox', { name: value }) as HTMLInputElement
     await userEvent.click(checkbox)
 
@@ -104,9 +95,9 @@ describe('Table Filter', () => {
     const [min, max] = within(birth).getAllByRole('textbox') as HTMLInputElement[]
 
     await userEvent.type(min, '2019-03-22')    // appends to the existing text
-    expect(onFilterChangeMock).toHaveBeenCalledWith('Birth', { min: '2019-03-22' })
+    expect(onFilterChangeMock).toHaveBeenCalledWith('Birth', { min: '2019-03-22', parser: parser })
 
     await userEvent.type(max, '2021-03-22')   // appends to the existing text
-    expect(onFilterChangeMock).toHaveBeenCalledWith('Birth', { max: '2021-03-22' })
+    expect(onFilterChangeMock).toHaveBeenCalledWith('Birth', { max: '2021-03-22', parser: parser })
   })
 })

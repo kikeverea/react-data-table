@@ -172,7 +172,7 @@ describe('Table', () => {
       })
 
       test('renders rows that pass the range filter', () => {
-        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 8, max: 15 } }} />)
+        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 8, max: 15, type: 'number'} }} />)
 
         const rows = screen.getAllByRole('row').slice(1)
 
@@ -186,7 +186,7 @@ describe('Table', () => {
 
 
       test('renders rows that pass the range filter, edge cases', () => {
-        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 10, max: 13 } }} />)
+        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 10, max: 13, type: 'number'} }} />)
 
         const rows = screen.getAllByRole('row').slice(1)
 
@@ -199,7 +199,7 @@ describe('Table', () => {
       })
 
       test('renders rows that pass a min range filter', () => {
-        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 12 } }} />)
+        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 12, type: 'number'} }} />)
 
         const rows = screen.getAllByRole('row').slice(1)
 
@@ -238,7 +238,7 @@ describe('Table', () => {
       })
 
       test('renders rows that pass the max range filter', () => {
-        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { max: 12 } }} />)
+        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { max: 12, type: 'number' } }} />)
 
         const rows = screen.getAllByRole('row').slice(1)
 
@@ -261,6 +261,7 @@ describe('Table', () => {
               'Birth': {
                 min: '2012-07-14',
                 max: '2015-07-14',
+                type: 'date',
                 parser: date => parse(date, dateFormat, new Date()).getTime()
               }}}
           />)
@@ -279,7 +280,7 @@ describe('Table', () => {
         render(<Table
           collection={ collection }
           columns={ columns }
-          filter={{ 'Age': { min: 8, max: 16 }, 'Family': ['feline'] }}
+          filter={{ 'Age': { min: 8, max: 16, type: 'number' }, 'Family': ['feline'] }}
           search='Lion'
         />)
 
@@ -520,7 +521,7 @@ describe('Table', () => {
         render(<Table
           collection={ collection }
           columns={ columns }
-          filter={{ 'Age': { min: 8, max: 16 } }}
+          filter={{ 'Age': { min: 8, max: 16, type: 'number' } }}
           search='Lion'
           sort={{ by: 'name', direction: 'desc' }}
         />)

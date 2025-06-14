@@ -1,18 +1,29 @@
-import { FilterRange, TableFilterProps } from './types/types.ts'
+import {StructureRange, TableFilterProps} from './types/types.ts'
 import {ChangeEvent} from 'react'
 
-const isRange = (value: any): value is FilterRange => value.range
+const isRange = (value: any): value is StructureRange => value.range
 
 const TableFilter = ({ filterStructure, onFilterValueChanged }: TableFilterProps) => {
 
-  const handleRangeValueChanged = (e: ChangeEvent<HTMLInputElement>, column: string, type: string, rangeTarget: string): void => {
+  const handleRangeValueChanged = (
+    e: ChangeEvent<HTMLInputElement>,
+    column: string,
+    range: StructureRange,
+    rangeTarget: 'min' | 'max'): void =>
+  {
     const newValue = e.currentTarget.value
+    const type = range.type
 
     const value = type === 'date'
       ? newValue
       : parseFloat(newValue)
 
-    onFilterValueChanged(column, { [rangeTarget]: value })
+    onFilterValueChanged(column, { [rangeTarget]: value, parser: range.parser })
+  }
+
+  const handleFilterValueChanged = (e: ChangeEvent<HTMLInputElement>, column: string, valueName: string): void => {
+    const checkbox = e.currentTarget
+    onFilterValueChanged(column, { name: valueName, checked: checkbox.checked })
   }
 
   return (
@@ -32,7 +43,7 @@ const TableFilter = ({ filterStructure, onFilterValueChanged }: TableFilterProps
                         type="text"
                         aria-label={ `${columnName.toLowerCase()} min` }
                         onChange= { e =>
-                          handleRangeValueChanged(e, columnName, value.type, 'min')
+                          handleRangeValueChanged(e, columnName, value, 'min')
                         }
                       />
                       <label htmlFor={ `${columnName.toLowerCase()}-max` }>Max</label>
@@ -42,16 +53,16 @@ const TableFilter = ({ filterStructure, onFilterValueChanged }: TableFilterProps
                         aria-label={ `${columnName.toLowerCase()} max` }
                         type="text"
                         onChange= { e =>
-                          handleRangeValueChanged(e, columnName, value.type, 'max')
+                          handleRangeValueChanged(e, columnName, value, 'max')
                         }
                       />
                     </>
-                  : Object.entries(value).map(([valueName]) =>
+                  : value.map((valueName) =>
                       <label key={ valueName }>
                         <input
                           type='checkbox'
                           name={ valueName.toLowerCase() }
-                          onChange={ (e) => onFilterValueChanged(columnName, { name: valueName, checked: e.target.checked }) }
+                          onChange={ (e) => handleFilterValueChanged(e, columnName, valueName) }
                         />
                         { valueName }
                       </label>

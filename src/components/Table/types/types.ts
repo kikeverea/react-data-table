@@ -72,4 +72,6 @@ export type TableFilterProps = {
   ) => void
 }
 
-export type FilterEventValue = { min: number, max: number } | { name: string, checked: boolean }
+export type FilterEventValue =
+  { min?: number | string, max?: number | string, parser?: (...args: any[]) => any } |
+  { name: string, checked: boolean }

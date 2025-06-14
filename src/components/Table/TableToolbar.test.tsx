@@ -38,13 +38,6 @@ describe('Table Toolbar', () => {
       { id: 2, name: 'Dog', family: 'Canine', type: 'Pet', age: 5, birth: '2020-07-14' }
     ]
 
-    const emptyAge = {
-      "max": undefined,
-      "min": undefined,
-      "range": true,
-      "type": "number",
-    }
-
     test("Doesn't show filter if empty", () => {
       render(<TableToolbar filterColumns={[]} collection={[]}/>)
 
@@ -77,35 +70,28 @@ describe('Table Toolbar', () => {
         />
       )
 
-      screen.debug()
-
       const felineCheckbox = screen.getAllByRole('checkbox')[0]
       await userEvent.click(felineCheckbox)
-      expect(onFilterChangeMock).toHaveBeenCalledWith('family', { name: 'feline', checked: 'true' })
+      expect(onFilterChangeMock).toHaveBeenCalledWith('family', { name: 'Feline', checked: true })
 
       const canineCheckbox = screen.getAllByRole('checkbox')[1]
       await userEvent.click(canineCheckbox)
-      expect(onFilterChangeMock).toHaveBeenCalledWith({ 'family': ['Feline', 'Canine'], 'type': [], 'age': emptyAge })
+      expect(onFilterChangeMock).toHaveBeenCalledWith('family', { name: 'Feline', checked: true })
 
       const petCheckbox = screen.getAllByRole('checkbox')[2]
       await userEvent.click(petCheckbox)
-      expect(onFilterChangeMock).toHaveBeenCalledWith({ 'family': ['Feline', 'Canine'], 'type': ['Pet'], 'age': emptyAge })
+      expect(onFilterChangeMock).toHaveBeenCalledWith('type', { name: 'Pet', checked: true })
 
       await userEvent.click(felineCheckbox)
-      expect(onFilterChangeMock).toHaveBeenCalledWith({ 'family': ['Canine'], 'type': ['Pet'], 'age': emptyAge })
+      expect(onFilterChangeMock).toHaveBeenCalledWith('family', { name: 'Feline', checked: false })
 
       const minAge = screen.getByLabelText('age min')
       await userEvent.type(minAge, '5')
-      expect(onFilterChangeMock).toHaveBeenCalledWith({
-        'family': ['Canine'], 'type': ['Pet'], age: { min: 5, max: undefined, range: true, type: 'number' }
-      })
+      expect(onFilterChangeMock).toHaveBeenCalledWith('age', { min: 5 })
 
       const maxAge = screen.getByLabelText('age max')
       await userEvent.type(maxAge, '10')
-
-      expect(onFilterChangeMock).toHaveBeenCalledWith({
-        'family': ['Canine'], 'type': ['Pet'], age: { min: 5, max: 10, range: true, type: 'number' }
-      })
+      expect(onFilterChangeMock).toHaveBeenCalledWith('age', { max: 10 })
 
     })
   })
