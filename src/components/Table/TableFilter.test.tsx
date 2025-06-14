@@ -6,25 +6,16 @@ import TableFilter from './TableFilter.tsx'
 describe('Table Filter', () => {
 
   const filter: FilterStructure = {
-    'Family': {
-      'Feline': false,
-      'Canine': true,
-      'Seals': true,
-      'Fish': true,
-      'Primate': false,
-    },
-    'Type': {
-      'Pet': true,
-      'Wild': false,
-    },
-    'Age': { min: 5, max: 8, type: 'number', range: true },
-    'Birth': { min: '2019-03-22', max: '2021-03-22', type: 'date', range: true }
+    'Family': ['Feline', 'Canine', 'Seals', 'Fish', 'Primate'],
+    'Type': ['Pet', 'Wild',],
+    'Age': { type: 'number', range: true },
+    'Birth': { type: 'date', range: true }
   }
 
   const onFilterChangeMock = vi.fn()
 
   beforeEach(() => {
-    render(<TableFilter filter={ filter } onFilterValueChanged={ onFilterChangeMock }/>)
+    render(<TableFilter filterStructure={ filter } onFilterValueChanged={ onFilterChangeMock }/>)
   })
 
   test('component has a dialog role, aria modal and is labeled', () => {
@@ -66,16 +57,16 @@ describe('Table Filter', () => {
     const min = screen.getByLabelText('age min') as HTMLInputElement
     const max = screen.getByLabelText('age max') as HTMLInputElement
 
-    expect(min.value).toBe('5')
-    expect(max.value).toBe('8')
+    expect(min).toBeDefined()
+    expect(max).toBeDefined()
   })
 
   test('renders date ranges', () => {
     const min = screen.getByLabelText('birth min') as HTMLInputElement
     const max = screen.getByLabelText('birth max') as HTMLInputElement
 
-    expect(min.value).toBe('2019-03-22')
-    expect(max.value).toBe('2021-03-22')
+    expect(min).toBeDefined()
+    expect(max).toBeDefined()
   })
 
   test.each([
@@ -100,12 +91,11 @@ describe('Table Filter', () => {
     const age = screen.getByRole('group', { name: 'Age' })
     const [min, max] = within(age).getAllByRole('textbox') as HTMLInputElement[]
 
-    await userEvent.type(min, '1')    // appends to the existing text
-    expect(onFilterChangeMock).toHaveBeenCalledWith('Age', { min: 51 })
+    await userEvent.type(min, '1')
+    expect(onFilterChangeMock).toHaveBeenCalledWith('Age', { min: 1 })
 
-    await userEvent.clear(max)
-    await userEvent.type(max, '1')   // appends to the existing text
-    expect(onFilterChangeMock).toHaveBeenCalledWith('Age', { max: 81 })
+    await userEvent.type(max, '1')
+    expect(onFilterChangeMock).toHaveBeenCalledWith('Age', { max: 1 })
   })
 
   test('input in a date range calls the handler with the column name and range value', async () => {
@@ -113,10 +103,10 @@ describe('Table Filter', () => {
     const birth = screen.getByRole('group', { name: 'Birth' })
     const [min, max] = within(birth).getAllByRole('textbox') as HTMLInputElement[]
 
-    await userEvent.type(min, '1')    // appends to the existing text
-    expect(onFilterChangeMock).toHaveBeenCalledWith('Birth', { min: '2019-03-221' })
+    await userEvent.type(min, '2019-03-22')    // appends to the existing text
+    expect(onFilterChangeMock).toHaveBeenCalledWith('Birth', { min: '2019-03-22' })
 
-    await userEvent.type(max, '1')   // appends to the existing text
-    expect(onFilterChangeMock).toHaveBeenCalledWith('Birth', { max: '2021-03-221' })
+    await userEvent.type(max, '2021-03-22')   // appends to the existing text
+    expect(onFilterChangeMock).toHaveBeenCalledWith('Birth', { max: '2021-03-22' })
   })
 })

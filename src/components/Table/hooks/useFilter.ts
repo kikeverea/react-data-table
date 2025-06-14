@@ -1,10 +1,9 @@
-import {Dispatch, SetStateAction, useMemo, useRef, useState} from 'react'
-import {Dictionary, FilterColumns, FilterRange, FilterStructure, RangeColumn} from '../types/types.ts'
+import {useMemo, useRef, useState} from 'react'
+import {Dictionary, FilterColumns, FilterStructure, StructureRange} from '../types/types.ts'
 
-type UseFilterReturn = [
-  FilterStructure | null | undefined,
-  Dispatch<SetStateAction<FilterStructure | null | undefined>>
-]
+type UseFilterReturn = FilterStructure
+
+type RangeColumn = [string, 'range', ('number' | 'date'), (value: string) => number]
 
 const useFilter = (columns?: FilterColumns, collection?: Dictionary<string|number>[]): UseFilterReturn => {
 
@@ -12,7 +11,7 @@ const useFilter = (columns?: FilterColumns, collection?: Dictionary<string|numbe
 
   const [filterStructure, version] = useMemo<[FilterStructure | {}, number]>((): [FilterStructure | {}, number] =>
       [
-        extractFilter(columns, collection),
+        buildFilterStructure(columns, collection),
         filterVersion.current + 1
       ],
     [columns, collection])
@@ -24,15 +23,12 @@ const useFilter = (columns?: FilterColumns, collection?: Dictionary<string|numbe
     filterVersion.current = version
   }
 
-  return [filter, setFilter]
+  return filter || {}
 }
 
-export const extractFilter = (
-  columns?: FilterColumns,
-  collection?: Dictionary<string|number>[],
-  previousState?: FilterStructure
-)
-: FilterStructure | {} => {
+export const buildFilterStructure =
+  (columns?: FilterColumns, collection?: Dictionary<string|number>[]): FilterStructure | {} =>
+{
 
   if (!collection?.length || !columns?.length)
     return {}
@@ -41,59 +37,44 @@ export const extractFilter = (
 
     if (isRangeColumn(column)) {
       const [columnName] = column
-      filter[columnName] = extractRangeFilter(column, previousState)
+      filter[columnName] = extractRangeFilter(column)
     }
     else {
       // noinspection UnnecessaryLocalVariableJS
       const columnName = column
-      filter[columnName] = extractBooleanFilter(column, collection, previousState)
+      filter[columnName] = extractValuesFilter(column, collection)
     }
 
     return filter
   }, {})
 }
 
-const extractRangeFilter = (column: RangeColumn, previousState?: FilterStructure): FilterRange => {
-  const [columnName, _range, type] = column
-  const previousRange = previousState && previousState[columnName]
+const extractRangeFilter = (column: RangeColumn): StructureRange => {
+  const [_columnName, _range, type] = column
 
-  assertFilterRange(previousRange)
-
-  return previousRange || { type: type, range: true }
+  return { type: type, range: true }
 }
 
-const extractBooleanFilter = (column: string, collection: Dictionary<string|number>[], previousState?: FilterStructure): Dictionary<boolean> => {
+const extractValuesFilter = (column: string, collection: Dictionary<string|number>[]): string[] => {
   const columnName = column
-  const previousBooleanSet = previousState && previousState[columnName]
 
-  assertNotFilterRange(previousBooleanSet)
-
-  return collection.reduce((filterValue, entity) => {
+  const values = collection.map((entity) => {
 
     const value = String(entity[columnName] || '').trim()
 
-    if (value) {
-      const previousFilterValue = previousBooleanSet && previousBooleanSet[value]
-      filterValue[value] = previousFilterValue || false
-    } else
+    if (value)
+      return value
+    else {
       console.warn(`Could not find column ${columnName}. Available columns: ${Object.keys(entity).join(', ')}`)
-
-    return filterValue
+      return ''
+    }
   },
-  {} as Dictionary<boolean>)
+  [] as string[])
+
+  return Array.from(new Set(values))  // remove duplicates
 }
 
 const isRangeColumn = (column: string | any[]): column is RangeColumn =>
   Array.isArray(column) && column[1] === 'range'
-
-function assertNotFilterRange(value?: { range?: boolean }): asserts value is Dictionary<boolean> {
-  if (value?.range)
-    throw new Error('Value is a FilterRange')
-}
-
-function assertFilterRange(value?: { range?: boolean }): asserts value is FilterRange {
-  if (value && !value.range)
-    throw new Error('Value is not FilterRange')
-}
 
 export default useFilter

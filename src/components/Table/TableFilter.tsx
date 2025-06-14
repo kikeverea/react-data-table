@@ -1,9 +1,9 @@
 import { FilterRange, TableFilterProps } from './types/types.ts'
 import {ChangeEvent} from 'react'
 
-const isRange = (value: any): value is FilterRange => value.min != undefined || value.max != undefined
+const isRange = (value: any): value is FilterRange => value.range
 
-const TableFilter = ({ filter, onFilterValueChanged }: TableFilterProps) => {
+const TableFilter = ({ filterStructure, onFilterValueChanged }: TableFilterProps) => {
 
   const handleRangeValueChanged = (e: ChangeEvent<HTMLInputElement>, column: string, type: string, rangeTarget: string): void => {
     const newValue = e.currentTarget.value
@@ -17,8 +17,8 @@ const TableFilter = ({ filter, onFilterValueChanged }: TableFilterProps) => {
 
   return (
     <div role='dialog' aria-modal="true" aria-label="table filter">
-      { filter
-        ? Object.entries(filter).map(([columnName, value]) => {
+      { filterStructure
+        ? Object.entries(filterStructure).map(([columnName, value]) => {
 
           return (
             <fieldset key={ columnName }>
@@ -30,7 +30,6 @@ const TableFilter = ({ filter, onFilterValueChanged }: TableFilterProps) => {
                         id={`${columnName.toLowerCase()}-min`}
                         name='min'
                         type="text"
-                        value= { value.min }
                         aria-label={ `${columnName.toLowerCase()} min` }
                         onChange= { e =>
                           handleRangeValueChanged(e, columnName, value.type, 'min')
@@ -42,19 +41,17 @@ const TableFilter = ({ filter, onFilterValueChanged }: TableFilterProps) => {
                         name='max'
                         aria-label={ `${columnName.toLowerCase()} max` }
                         type="text"
-                        value={ value.max }
                         onChange= { e =>
                           handleRangeValueChanged(e, columnName, value.type, 'max')
                         }
                       />
                     </>
-                  : Object.entries(value).map(([valueName, value]) =>
+                  : Object.entries(value).map(([valueName]) =>
                       <label key={ valueName }>
                         <input
                           type='checkbox'
                           name={ valueName.toLowerCase() }
-                          checked={ value }
-                          onChange={ () => onFilterValueChanged(columnName, { name: valueName, checked: !value }) }
+                          onChange={ (e) => onFilterValueChanged(columnName, { name: valueName, checked: e.target.checked }) }
                         />
                         { valueName }
                       </label>

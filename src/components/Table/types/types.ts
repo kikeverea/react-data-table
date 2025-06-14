@@ -30,21 +30,30 @@ export type TableSort = { by: string, direction?: 'asc' | 'desc' }
 
 /************ Toolbar ***************/
 
+export type FilterColumns = (string | [string, 'range', ('number' | 'date'), ((value: string) => number)?])[]
+
 export type TableToolbarProps = {
   collection?: Dictionary<string|number>[]
-  filter?: FilterColumns,
+  search?: string,
   showSearch?: boolean,
-  showFilter?: boolean,
+  filterColumns?: FilterColumns,
   onSearchChange?: (search: string) => void,
-  onFilterChange?: (filter: TableFilter) => void,
+  onFilterChange?: (
+    columnName: string,
+    value: FilterEventValue
+  ) => void
 }
 
 
 /************ Filter ***************/
 
-export type FilterColumns = (string | [string, 'range', ('number' | 'date')])[]
+export type FilterStructure = Dictionary<string[] | StructureRange>
 
-export type FilterStructure = Dictionary<Dictionary<boolean> | FilterRange>
+export type StructureRange = {
+  range: true
+  type: 'number' | 'date',
+  parser?: (value: string) => number
+}
 
 export type TableFilter = Dictionary<string[] | FilterRange>
 
@@ -52,16 +61,15 @@ export type FilterRange = {
   min?: number | string,
   max?: number | string,
   type: 'number' | 'date',
-  parser?: (value: string) => number,
-  range: true
+  parser?: (value: string) => number
 }
-
-export type RangeColumn = [string, 'range', ('number' | 'date')]
 
 export type TableFilterProps = {
-  filter: FilterStructure,
+  filterStructure: FilterStructure,
   onFilterValueChanged: (
     columnName: string,
-    value: { name?: string, checked?: boolean, min?: number, max?: number }
+    value: FilterEventValue
   ) => void
 }
+
+export type FilterEventValue = { min: number, max: number } | { name: string, checked: boolean }

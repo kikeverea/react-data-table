@@ -1,5 +1,5 @@
 import {FilterColumns, FilterStructure} from '../types/types.ts'
-import { extractFilter } from './useFilter'
+import { buildFilterStructure } from './useFilter'
 import {TestData} from '../Table.test.tsx'
 
 
@@ -16,23 +16,15 @@ const longCollection: TestData[] = [
 ]
 
 test('creates a correct filter structure', () => {
+
   const expected: FilterStructure = {
-    'family': {
-      'Feline': false,
-      'Canine': false,
-      'Seals': false,
-      'Fish': false,
-      'Primate': false,
-    },
-    'type': {
-      'Pet': false,
-      'Wild': false,
-    },
+    'family': ['Feline', 'Canine', 'Seals', 'Fish', 'Primate'],
+    'type': ['Pet', 'Wild'],
     'age': { type: 'number', range: true },
     'birth': { type: 'date', range: true },
   }
 
-  const filter = extractFilter(columns, longCollection)
+  const filter = buildFilterStructure(columns, longCollection)
 
   expect(Object.keys(filter)).toHaveLength(Object.keys(expected).length)
   expect(filter).toEqual(expected)
