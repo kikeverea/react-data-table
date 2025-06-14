@@ -1,7 +1,7 @@
 import {render, screen, within} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { FilterStructure } from './types/types.ts'
-import TableFilter from './TableFilter.tsx'
+import { FilterStructure } from '../types/types.ts'
+import TableFilter from '../TableFilter.tsx'
 
 describe('Table Filter', () => {
 
