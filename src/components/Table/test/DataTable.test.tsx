@@ -1,15 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { TableColumn } from '../types/types.ts'
-import {TestData} from './Table.test.tsx'
-
-const columns: TableColumn<TestData>[] = [
-  { name: 'Name', data: item => `${item.name}`},
-  { name: 'Family', data: item => `${item.family}`},
-  { name: 'Type', data: item => `${item.type}`},
-  { name: 'Age', data: item => `${item.age}`, type: 'number' },
-  { name: 'Birth', data: item => `${item.birth}`, type: 'date' },
-]
+import { TestData} from './testUtils.ts'
 
 const longCollection: TestData[] = [
   { id: 1, name: 'Cat', family: 'Feline', type: 'Pet', age: 10, birth: '2015-07-14' },
@@ -22,5 +14,9 @@ const longCollection: TestData[] = [
 ]
 
 describe('Data Table', () => {
+
+  test('renders correctly', () => {
+
+  })
 
 })

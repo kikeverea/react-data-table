@@ -4,15 +4,7 @@ import Table from '../Table.tsx'
 import { TableColumn } from '../types/types.ts'
 
 import { parse } from 'date-fns'
-
-export type TestData = {
-  id: number,
-  name: string,
-  family: string,
-  type: string,
-  age: number,
-  birth: string,
-}
+import {getNameCellsContent, getTestData, TestData} from './testUtils.ts'
 
 describe('Table', () => {
 
@@ -86,7 +78,7 @@ describe('Table', () => {
         const cells = within(row).getAllByRole('cell')
         cells.forEach((cell, colIndex) => {
           expect(cell.textContent)
-            .toBe(getTestData({ row: rowIndex, col: colIndex}))
+            .toBe(getTestData({ collection, row: rowIndex, col: colIndex}))
         })
       })
     })
