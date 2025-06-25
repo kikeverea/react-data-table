@@ -4,7 +4,7 @@ import Table from '../Table.tsx'
 import { TableColumn } from '../types/types.ts'
 
 import { parse } from 'date-fns'
-import {getNameCellsContent, getTestData, TestData} from './testUtils.ts'
+import {dataRows, getNameCellsContent, getTestData, TestData} from './testUtils.ts'
 
 describe('Table', () => {
 
@@ -49,7 +49,7 @@ describe('Table', () => {
     test('renders empty message', () => {
       render(<Table collection={ [] } columns={ columns } />)
 
-      const rows = screen.getAllByRole('row').slice(1)
+      const rows = dataRows()
       const [emptyMessage] = getNameCellsContent(rows)
 
       expect(rows.length).toBe(1)
@@ -59,7 +59,7 @@ describe('Table', () => {
     test('renders custom empty message', () => {
       render(<Table collection={ [] } columns={ columns } noEntriesMessage='No entries'/>)
 
-      const rows = screen.getAllByRole('row').slice(1)
+      const rows = dataRows()
       const [emptyMessage] = getNameCellsContent(rows)
 
       expect(rows.length).toBe(1)
@@ -87,7 +87,7 @@ describe('Table', () => {
       test('renders rows that pass the search', () => {
         render(<Table collection={ collection } columns={ columns } search='dog' />)
 
-        const rows = screen.getAllByRole('row').slice(1)
+        const rows = dataRows()
         const [lion] = getNameCellsContent(rows)
 
         expect(rows.length).toBe(1)
@@ -97,7 +97,7 @@ describe('Table', () => {
       test('renders empty message if no row passes the search', () => {
         render(<Table collection={ collection } columns={ columns } search='no-rows' />)
 
-        const rows = screen.getAllByRole('row').slice(1)
+        const rows = dataRows()
         const [emptyMessage] = getNameCellsContent(rows)
 
         expect(rows.length).toBe(1)
@@ -114,7 +114,7 @@ describe('Table', () => {
           }}
         />)
 
-        const rows = screen.getAllByRole('row').slice(1)
+        const rows = dataRows()
         const [lion, redFox] = getNameCellsContent(rows)
 
         expect(rows.length).toBe(2)
@@ -125,7 +125,7 @@ describe('Table', () => {
       test('renders rows that pass the filter and search', () => {
         render(<Table collection={ collection } columns={ columns } search='cat' filter={{ 'Family': ['feline'] }} />)
 
-        const rows = screen.getAllByRole('row').slice(1)
+        const rows = dataRows()
         const [cat] = getNameCellsContent(rows)
 
         expect(rows.length).toBe(1)
@@ -135,7 +135,7 @@ describe('Table', () => {
       test('renders rows that pass the range filter', () => {
         render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 8, max: 15, type: 'number'} }} />)
 
-        const rows = screen.getAllByRole('row').slice(1)
+        const rows = dataRows()
 
         // Names in expected order
         const [cat, lion] = getNameCellsContent(rows)
@@ -148,7 +148,7 @@ describe('Table', () => {
       test('renders rows that pass the range filter, edge cases', () => {
         render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 10, max: 13, type: 'number'} }} />)
 
-        const rows = screen.getAllByRole('row').slice(1)
+        const rows = dataRows()
 
         // Names in expected order
         const [cat, lion] = getNameCellsContent(rows)
@@ -161,7 +161,7 @@ describe('Table', () => {
       test('renders rows that pass a min range filter', () => {
         render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 12, type: 'number'} }} />)
 
-        const rows = screen.getAllByRole('row').slice(1)
+        const rows = dataRows()
 
         // Names in expected order
         const [lion, seaLion] = getNameCellsContent(rows)
@@ -180,7 +180,7 @@ describe('Table', () => {
       ('renders empty message if no row passes the filter', noPassFilter => {
         render(<Table collection={ collection } columns={ columns } filter={ noPassFilter as { [column: string]: any } } />)
 
-        const rows = screen.getAllByRole('row').slice(1)
+        const rows = dataRows()
         const [emptyMessage] = getNameCellsContent(rows)
 
         expect(rows.length).toBe(1)
@@ -190,7 +190,7 @@ describe('Table', () => {
       test('renders empty message if no row passes the filter and search', () => {
         render(<Table collection={ collection } columns={ columns } search='dog' filter={{ 'Family': ['feline'] }} />)
 
-        const rows = screen.getAllByRole('row').slice(1)
+        const rows = dataRows()
         const [emptyMessage] = getNameCellsContent(rows)
 
         expect(rows.length).toBe(1)
@@ -200,7 +200,7 @@ describe('Table', () => {
       test('renders rows that pass the max range filter', () => {
         render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { max: 12, type: 'number' } }} />)
 
-        const rows = screen.getAllByRole('row').slice(1)
+        const rows = dataRows()
 
         // Names in expected order
         const [cat, dog] = getNameCellsContent(rows)
@@ -226,7 +226,7 @@ describe('Table', () => {
               }}}
           />)
 
-        const rows = screen.getAllByRole('row').slice(1)
+        const rows = dataRows()
 
         // Names in expected order
         const [cat, lion] = getNameCellsContent(rows)
@@ -244,7 +244,7 @@ describe('Table', () => {
           search='Lion'
         />)
 
-        const rows = screen.getAllByRole('row').slice(1)
+        const rows = dataRows()
         const [lion] = getNameCellsContent(rows)
 
         expect(rows.length).toBe(1)
@@ -296,7 +296,7 @@ describe('Table', () => {
       test('paginates data', () => {
         render(<Table collection={ collection } columns={ columns } paginate={ 2 }/>)
 
-        const rows = screen.getAllByRole('row').slice(1)
+        const rows = dataRows()
         expect(rows.length).toBe(2)
 
         // Names in expected order
@@ -380,7 +380,7 @@ describe('Table', () => {
 
         await userEvent.selectOptions(pageCountSelect, '10')
 
-        const rows = screen.getAllByRole('row').slice(1)
+        const rows = dataRows()
         expect(rows).toHaveLength(Math.min(longCollection.length, 10))
       })
     })
@@ -389,7 +389,7 @@ describe('Table', () => {
       test('sorts rows ascending', () => {
         render(<Table collection={ collection } columns={ columns } sortBy={{ by: 'family' }} />)
 
-        const rows = screen.getAllByRole('row').slice(1)
+        const rows = dataRows()
         expect(rows.length).toBe(collection.length)
 
         // Names in expected order
@@ -404,7 +404,7 @@ describe('Table', () => {
       test('sorts rows descending', () => {
         render(<Table collection={ collection } columns={ columns } sortBy={{ by: 'family', direction: 'desc' }} />)
 
-        const rows = screen.getAllByRole('row').slice(1)
+        const rows = dataRows()
         expect(rows.length).toBe(collection.length)
 
         // Names in expected order
@@ -486,7 +486,7 @@ describe('Table', () => {
           sortBy={{ by: 'name', direction: 'desc' }}
         />)
 
-        const rows = screen.getAllByRole('row').slice(1)
+        const rows = dataRows()
         expect(rows.length).toBe(2)
 
         // Names in expected order
@@ -499,7 +499,7 @@ describe('Table', () => {
       test('sorts a filtered, paginated collection', () => {
         render(<Table collection={ collection } columns={ columns } sortBy={{ by: 'family' }} paginate={ 2 } />)
 
-        const rows = screen.getAllByRole('row').slice(1)
+        const rows = dataRows()
         expect(rows.length).toBe(2)
 
         // Names in expected order
