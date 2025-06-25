@@ -16,12 +16,11 @@ export type TableProps<T extends Entity> = {
   columns: TableColumn<T>[],
   search?: string,
   filter?: TableFilter,
-  sort?: TableSort,
+  sortBy?: TableSort,
   noEntriesMessage?: string,
   pagination?: number,
   page?: number,
 }
-
 
 /************ Sort ***************/
 

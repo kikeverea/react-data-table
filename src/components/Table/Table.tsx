@@ -1,4 +1,4 @@
-import {isValidElement, ReactNode, useMemo, useState} from 'react'
+import {isValidElement, ReactNode, useState} from 'react'
 import {Entity, FilterRange, TableColumn, TableFilter, TableProps, TableSort} from './types/types.ts'
 
 const Table = <T extends Entity>(
@@ -7,13 +7,11 @@ const Table = <T extends Entity>(
   columns,
   search,
   filter,
-  sort: sortBy,
+  sortBy,
   pagination: itemsPerPage,
   page: currentPage,
   noEntriesMessage,
 }: TableProps<T>) => {
-
-  const header = useMemo(() => columns.map(col => col.name), [columns])
 
   const [sort, setSort] = useState<TableSort | undefined>(sortBy)
   const [pagination, setPagination] = useState(itemsPerPage)
@@ -52,8 +50,8 @@ const Table = <T extends Entity>(
       <table>
         <thead>
           <tr>
-            { header.map(headerName =>
-              <th key={ headerName } onClick={ ()=> handleSortChange(headerName) }>{ headerName }</th>)
+            { columns.map(col =>
+              <th key={ col.name } onClick={ ()=> handleSortChange(col.name) }>{ col.name }</th>)
             }
           </tr>
         </thead>
@@ -241,12 +239,12 @@ const evaluateFilter = (filter: string[] | FilterRange, value: string): boolean 
     return filter.some(filterValue => value.toLowerCase().includes(filterValue.toLowerCase()))
 }
 
-const pageRange = (currentPage: number, pagination: number | undefined, collectionLength: number): readonly [number, number]=> {
-  if (!pagination)
+const pageRange = (currentPage: number, itemsPerPage: number | undefined, collectionLength: number): readonly [number, number]=> {
+  if (!itemsPerPage)
     return [0, collectionLength]
 
-  const startIndex = currentPage * pagination
-  const endIndex = startIndex + pagination
+  const startIndex = currentPage * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
 
   return [startIndex, endIndex]
 }
