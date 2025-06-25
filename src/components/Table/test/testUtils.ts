@@ -9,6 +9,10 @@ export type TestData = {
   birth: string,
 }
 
+export const dataRows = () => {
+  return screen.getAllByRole('row').slice(1)    // rows excluding the header row
+}
+
 export const getTestData = ({ collection, row, col }: { collection: TestData[] ,row: number, col: number }) => {
 
   const dataRow = collection[row]
@@ -31,12 +35,9 @@ export const getTestData = ({ collection, row, col }: { collection: TestData[] ,
   }
 }
 
-export const getNameCellsContent = (collection?: HTMLElement[]) => {
+export const getNameCellsContent = (rows: HTMLElement[]=dataRows()) => {
   const nameCellIndex = 0
 
-  const rows = collection
-    ? collection
-    : screen.getAllByRole('row').slice(1)   // rows excluding the header row
-
-  return rows.map(row => within(row).getAllByRole('cell')[nameCellIndex].textContent)
+  return rows.map(row =>
+    within(row).getAllByRole('cell')[nameCellIndex].textContent)
 }

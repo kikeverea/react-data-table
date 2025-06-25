@@ -53,7 +53,6 @@ describe('Table Toolbar', () => {
       const typeParam = screen.getByLabelText('type')
 
       expect(filterElement).toBeDefined()
-
       expect(familyParam).toBeDefined()
       expect(typeParam).toBeDefined()
     })

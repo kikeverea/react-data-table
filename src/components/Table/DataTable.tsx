@@ -1,64 +1,90 @@
 import {
-  Dictionary,
   FilterEventValue,
   FilterRange,
-  TableFilter as TableFilterType
+  TableFilter, DataTableProps, Entity
 } from './types/types.ts'
 
 import {useState} from 'react'
+import TableToolbar from './TableToolbar'
+import Table from './Table'
 
-const DataTable = () => {
-  const [filter, setFilter] = useState<TableFilterType>({})
+const DataTable = <T extends Entity> (
+{
+  collection,
+  columns,
+  sortBy,
+  filter: filterColumns,
+  showSearch=true,
+  paginate,
+  noEntriesMessage,
+}: DataTableProps<T>) => {
 
-  const updateFilter = (columnName: string, value: FilterEventValue) => {
+  const [filter, setFilter] = useState<TableFilter>({})
+  const [search, setSearch] = useState<string>('')
 
-    const tableFilter: TableFilterType = buildTableFilter(filter, value)
-
-    setFilter(tableFilter)
+  const updateFilter = (column: string, value: FilterEventValue) => {
+    const tableFilter: TableFilter = buildTableFilter(column, filter, value)
+    setFilter({ ...tableFilter })
   }
+
+  return (
+    <>
+      { (showSearch || filter?.length) &&
+        <TableToolbar
+          collection={ collection }
+          filterColumns={ filterColumns }
+          showSearch={ showSearch }
+          onSearchChange={ setSearch }
+          onFilterChange={ updateFilter }
+        />
+      }
+      <Table
+        collection={ collection }
+        columns={ columns }
+        search={ search }
+        filter={ filter }
+        sortBy={ sortBy }
+        paginate={ paginate }
+        noEntriesMessage={ noEntriesMessage }
+      />
+    </>
+  )
 }
 
 export default DataTable
 
-const buildTableFilter = (filter: TableFilterType, value: FilterEventValue): TableFilterType => {
+const buildTableFilter = (column: string, filter: TableFilter, value: FilterEventValue): TableFilter => {
 
-  return Object
-    .entries(filter)
-    .reduce((tableFilter: TableFilterType, filterParameter): TableFilterType => {
+  if (isCheckboxEvent(value)) {
 
-        const [columnName, filterValue] = filterParameter
+    let valuesArray = filter[column]
 
-        if (valueIsRange(value))
-          tableFilter[columnName] = { ...(filterValue || {}), ...value }
+    if (!valuesArray) {
+      valuesArray = []
+      filter[column] = valuesArray
+    }
 
-        else {
-          const listValue = tableFilter[columnName]
-          assertValueAsList(listValue)
+    assertValueAsArray(valuesArray)
 
-          if (value.checked)
-            listValue.push(value.name)
-          else
-            listValue.filter(name => name !== value.name)
-        }
+    if (value.checked)
+      valuesArray.push(value.name)
+    else
+      valuesArray.filter(name => name !== value.name)
+  }
+  else {
+    // is range event
 
-        return tableFilter
-      },
-      {} as TableFilterType)
+    const filterValue = filter[column]
+    filter[column] = { ...(filterValue || {}), ...value }
+  }
+
+  return filter
 }
 
-const valueIsRange = (value: any): value is { min: number, max: number } => value.range
-
-const isRange = (value: any): value is { [target: string]: string | number } =>
-  value.min != undefined || value.max != undefined
-
-const isFilterRange = (value: any): value is FilterRange => value.range
-
-const isCheckbox = (value: any): value is { name: string, checked: boolean } =>
+const isCheckboxEvent = (value: any): value is { name: string, checked: boolean } =>
   value.name && value.checked !== undefined
 
-const isFilterDictionary = (value: any): value is Dictionary<boolean> => !value.range
-
-function assertValueAsList (value: string[] | FilterRange): asserts value is string[] {
+function assertValueAsArray (value: string[] | FilterRange): asserts value is string[] {
   if (!Array.isArray(value))
-    throw new Error('Expected value to be a string array')
+    throw new Error(`Expected value to be a string array, but is a ${typeof value}`)
 }

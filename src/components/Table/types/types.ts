@@ -18,7 +18,7 @@ export type TableProps<T extends Entity> = {
   filter?: TableFilter,
   sortBy?: TableSort,
   noEntriesMessage?: string,
-  pagination?: number,
+  paginate?: number,
   page?: number,
 }
 
@@ -29,7 +29,9 @@ export type TableSort = { by: string, direction?: 'asc' | 'desc' }
 
 /************ Toolbar ***************/
 
-export type FilterColumns = (string | [string, 'range', ('number' | 'date'), ((value: string) => number)?])[]
+export type RangeFilter = [string, 'range', ('number' | 'date'), ((value: string) => number)?]
+
+export type FilterColumns = (string | RangeFilter)[]
 
 export type TableToolbarProps = {
   collection?: Dictionary<string|number>[]
@@ -74,3 +76,17 @@ export type TableFilterProps = {
 export type FilterEventValue =
   { min?: number | string, max?: number | string, parser?: (...args: any[]) => any } |
   { name: string, checked: boolean }
+
+
+/************ DataTable ***************/
+
+export type DataTableProps<T extends Entity> = {
+  collection?: T[]
+  columns: TableColumn<T>[],
+  sortBy?: TableSort,
+  noEntriesMessage?: string,
+  paginate?: number,
+  showSearch?: boolean,
+  filter?: FilterColumns,
+  page?: number,
+}

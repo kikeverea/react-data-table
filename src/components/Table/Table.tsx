@@ -8,7 +8,7 @@ const Table = <T extends Entity>(
   search,
   filter,
   sortBy,
-  pagination: itemsPerPage,
+  paginate: itemsPerPage,
   page: currentPage,
   noEntriesMessage,
 }: TableProps<T>) => {
