@@ -1,5 +1,5 @@
 import {FilterColumns, FilterStructure} from '../types/types.ts'
-import { buildFilterStructure } from './useFilter'
+import { buildFilterStructure } from './useFilter.ts'
 import {TestData} from '../test/Table.test.tsx'
 
 

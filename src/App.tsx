@@ -1,6 +1,6 @@
 import './App.css'
-import {TableColumn} from "./components/Table/types/types.ts";
-import DataTable from './components/Table/DataTable.tsx'
+import {TableColumn} from "./Table/types/types.ts";
+import DataTable from './Table/DataTable.tsx'
 
 type Animal = {
   id: number,

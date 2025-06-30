@@ -5,8 +5,8 @@ import {
 } from './types/types.ts'
 
 import {useState} from 'react'
-import TableToolbar from './TableToolbar'
-import Table from './Table'
+import TableToolbar from './TableToolbar.tsx'
+import Table from './Table.tsx'
 
 const DataTable = <T extends Entity> (
 {
