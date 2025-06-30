@@ -125,8 +125,11 @@ describe('Data Table', () => {
 
     describe('Filter', () => {
 
-      test('renders filter options', () => {
+      test('renders filter options', async () => {
         render(<DataTable collection={ collection } columns={ columns } filter={['family', 'type']}/>)
+
+        const showFilterButton = screen.getByLabelText('show filter')
+        await userEvent.click(showFilterButton)
 
         const filterElement = screen.getByLabelText('table filter')
         const familyParam = screen.getByText('Family')
@@ -139,6 +142,9 @@ describe('Data Table', () => {
 
       test('renders rows that pass the filter', async () => {
         render(<DataTable collection={ collection } columns={ columns } filter={['Family', 'Type', ['Age', 'range', 'number']]} />)
+
+        const showFilterButton = screen.getByLabelText('show filter')
+        await userEvent.click(showFilterButton)
 
         const felineCheckbox = screen.getByLabelText('Feline')
         const petCheckbox = screen.getByLabelText('Pet')
@@ -163,6 +169,9 @@ describe('Data Table', () => {
 
       test('renders rows that pass the range filter', async () => {
         render(<DataTable collection={ collection } columns={ columns } filter={['Family', 'Type', ['Age', 'range', 'number']]} />)
+
+        const showFilterButton = screen.getByLabelText('show filter')
+        await userEvent.click(showFilterButton)
 
         const minRange = screen.getByLabelText('Min')
         const maxRange = screen.getByLabelText('Max')

@@ -1,11 +1,9 @@
 import {useMemo, useRef, useState} from 'react'
 import {Dictionary, FilterColumns, FilterStructure, RangeFilter, StructureRange} from '../types/types.ts'
 
-type UseFilterReturn = FilterStructure
-
 type VersionedStructure = readonly [FilterStructure | {}, number]
 
-const useFilter = (columns?: FilterColumns, collection?: Dictionary<string|number>[]): UseFilterReturn => {
+const useFilter = (columns?: FilterColumns, collection?: Dictionary<string|number>[]): FilterStructure => {
 
   const filterVersion = useRef<number>(0)
 

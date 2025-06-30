@@ -38,15 +38,32 @@ describe('Table Toolbar', () => {
       { id: 2, name: 'Dog', family: 'Canine', type: 'Pet', age: 5, birth: '2020-07-14' }
     ]
 
-    test("Doesn't show filter if empty", () => {
-      render(<TableToolbar filterColumns={[]} collection={[]}/>)
+    test("Doesn't show filter no columns given", () => {
+      render(<TableToolbar collection={[]}/>)
 
-      const filter = screen.queryByLabelText('table filter')
-      expect(filter).toBeNull()
+      const showFilterButton = screen.queryByLabelText('show filter')
+      expect(showFilterButton).toBeNull()
     })
 
-    test('Renders filter', () => {
+    test("Doesn't show filter if empty columns", () => {
+      render(<TableToolbar filterColumns={[]} collection={[]}/>)
+
+      const showFilterButton = screen.queryByLabelText('show filter')
+      expect(showFilterButton).toBeNull()
+    })
+
+    test("Renders show filter button", () => {
       render(<TableToolbar filterColumns={['family', 'type']} collection={ collection } />)
+
+      const showFilterButton = screen.getByLabelText('show filter')
+      expect(showFilterButton).toBeDefined()
+    })
+
+    test('Displays filter', async () => {
+      render(<TableToolbar filterColumns={['family', 'type']} collection={ collection } />)
+
+      const showFilterButton = screen.getByLabelText('show filter')
+      await userEvent.click(showFilterButton)
 
       const filterElement = screen.getByLabelText('table filter')
       const familyParam = screen.getByLabelText('family')
@@ -68,6 +85,9 @@ describe('Table Toolbar', () => {
           onFilterChange={ onFilterChangeMock }
         />
       )
+
+      const filterButton = screen.getByLabelText('show filter')
+      await userEvent.click(filterButton)
 
       const felineCheckbox = screen.getAllByRole('checkbox')[0]
       await userEvent.click(felineCheckbox)

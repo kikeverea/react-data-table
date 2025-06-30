@@ -1,6 +1,7 @@
 import { TableToolbarProps } from './types/types.ts'
 import TableFilter from './TableFilter.tsx'
 import useFilterStructure from './hooks/useFilter.ts'
+import {useState} from 'react'
 
 const TableToolbar = (
 {
@@ -11,16 +12,21 @@ const TableToolbar = (
   onFilterChange=() => {}
 }: TableToolbarProps) => {
 
-  const showFilter = filterColumns?.length
-  const filterStructure = showFilter && useFilterStructure(filterColumns, collection)
+  const [showFilter, setShowFilter] = useState<boolean>(false)
+  const filterStructure = useFilterStructure(filterColumns, collection)
+
+  const hasStructure = filterStructure && Object.keys(filterStructure).length
 
   return (
     <div>
       { showSearch &&
         <input type='text' onInput={ e => onSearchChange(e.currentTarget.value) } aria-label='table search'/>
       }
-      { filterStructure && Object.keys(filterStructure).length > 0 &&
-        <TableFilter filterStructure={ filterStructure } onFilterValueChanged={ onFilterChange } />
+      { hasStructure && (
+          showFilter
+            ? <TableFilter filterStructure={ filterStructure } onFilterValueChanged={ onFilterChange } />
+            : <button aria-label='show filter' onClick={ () => setShowFilter(true)}>FILTER</button>
+        )
       }
     </div>
   )
