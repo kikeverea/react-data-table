@@ -65,7 +65,7 @@ describe('Data Table', () => {
 
     describe('Sorting', () => {
       test('sorts rows', () => {
-        render(<DataTable collection={ collection } columns={ columns } sortBy={{ by: 'family' }} />)
+        render(<DataTable collection={ collection } columns={ columns } sortBy={{ column: 'family' }} />)
 
         const rows = dataRows()
         expect(rows.length).toBe(collection.length)

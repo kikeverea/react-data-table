@@ -19,17 +19,17 @@ const Table = <T extends Entity>(
 
   const handleSortChange = (headerName: string): void => {
     if (!sort)
-      return setSort({ by: headerName })
+      return setSort({ column: headerName })
 
     const toggleSortDirection = (direction?: string): 'asc' | 'desc' => direction === 'asc' ? 'desc' : 'asc'
 
-    const isSameColumn = sort.by.toLowerCase() === headerName.toLowerCase()
+    const isSameColumn = sort.column.toLowerCase() === headerName.toLowerCase()
 
     const direction = isSameColumn
       ? toggleSortDirection(sort.direction || 'asc')
       : 'asc'
 
-    setSort({ by: headerName, direction: direction })
+    setSort({ column: headerName, direction: direction })
   }
 
   const [pageStart, pageEnd] = pageRange(page, pagination, collection?.length || 0)
@@ -162,7 +162,7 @@ const applySort = <T extends Entity>(
   if (!sort)
     return 0
 
-  const column = columns.find(column => column.name.toLowerCase() === sort.by.toLowerCase())
+  const column = columns.find(column => column.name.toLowerCase() === sort.column.toLowerCase())
 
   if (!column)
     return 0

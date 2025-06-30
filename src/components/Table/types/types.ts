@@ -24,7 +24,7 @@ export type TableProps<T extends Entity> = {
 
 /************ Sort ***************/
 
-export type TableSort = { by: string, direction?: 'asc' | 'desc' }
+export type TableSort = { column: string, direction?: 'asc' | 'desc' }
 
 
 /************ Toolbar ***************/

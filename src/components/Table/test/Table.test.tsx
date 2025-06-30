@@ -387,7 +387,7 @@ describe('Table', () => {
 
     describe('Sorting', () => {
       test('sorts rows ascending', () => {
-        render(<Table collection={ collection } columns={ columns } sortBy={{ by: 'family' }} />)
+        render(<Table collection={ collection } columns={ columns } sortBy={{ column: 'family' }} />)
 
         const rows = dataRows()
         expect(rows.length).toBe(collection.length)
@@ -402,7 +402,7 @@ describe('Table', () => {
       })
 
       test('sorts rows descending', () => {
-        render(<Table collection={ collection } columns={ columns } sortBy={{ by: 'family', direction: 'desc' }} />)
+        render(<Table collection={ collection } columns={ columns } sortBy={{ column: 'family', direction: 'desc' }} />)
 
         const rows = dataRows()
         expect(rows.length).toBe(collection.length)
@@ -417,7 +417,7 @@ describe('Table', () => {
       })
 
       test('sorts by number asc', () => {
-        render(<Table collection={ collection } columns={ columns } sortBy={{ by: 'age' }} />)
+        render(<Table collection={ collection } columns={ columns } sortBy={{ column: 'age' }} />)
 
         // Names in expected order
         const [dog, cat, lion, seaLion] = getNameCellsContent()
@@ -429,7 +429,7 @@ describe('Table', () => {
       })
 
       test('sorts by number desc', () => {
-        render(<Table collection={ collection } columns={ columns } sortBy={{ by: 'age', direction: 'desc' }} />)
+        render(<Table collection={ collection } columns={ columns } sortBy={{ column: 'age', direction: 'desc' }} />)
 
         // Names in expected order
         const [seaLion, lion, cat, dog] = getNameCellsContent()
@@ -441,7 +441,7 @@ describe('Table', () => {
       })
 
       test('sorts by date asc', () => {
-        render(<Table collection={ collection } columns={ columns } sortBy={{ by: 'birth' }} />)
+        render(<Table collection={ collection } columns={ columns } sortBy={{ column: 'birth' }} />)
 
         // Names in expected order
         const [seaLion, lion, cat, dog] = getNameCellsContent()
@@ -453,7 +453,7 @@ describe('Table', () => {
       })
 
       test('sorts by date desc', () => {
-        render(<Table collection={ collection } columns={ columns } sortBy={{ by: 'birth', direction: 'desc' }} />)
+        render(<Table collection={ collection } columns={ columns } sortBy={{ column: 'birth', direction: 'desc' }} />)
 
         // Names in expected order
         const [dog, cat, lion, seaLion] = getNameCellsContent()
@@ -469,7 +469,7 @@ describe('Table', () => {
         render(<Table
           collection={ [...collection, { id: 5, name: 'Invalid', family: 'x', type: 'x', age: 0, birth: 'invalid' }] }
           columns={ columns }
-          sortBy={{ by: 'birth', direction: sortDirection as ('asc' | 'desc') }}
+          sortBy={{ column: 'birth', direction: sortDirection as ('asc' | 'desc') }}
         />)
 
         // Names in expected order
@@ -483,7 +483,7 @@ describe('Table', () => {
           columns={ columns }
           filter={{ 'Age': { min: 8, max: 16, type: 'number' } }}
           search='Lion'
-          sortBy={{ by: 'name', direction: 'desc' }}
+          sortBy={{ column: 'name', direction: 'desc' }}
         />)
 
         const rows = dataRows()
@@ -497,7 +497,7 @@ describe('Table', () => {
       })
 
       test('sorts a filtered, paginated collection', () => {
-        render(<Table collection={ collection } columns={ columns } sortBy={{ by: 'family' }} paginate={ 2 } />)
+        render(<Table collection={ collection } columns={ columns } sortBy={{ column: 'family' }} paginate={ 2 } />)
 
         const rows = dataRows()
         expect(rows.length).toBe(2)
@@ -510,7 +510,7 @@ describe('Table', () => {
       })
 
       test('sorts the table by the clicked header', async () => {
-        render(<Table collection={ collection } columns={ columns } sortBy={{ by: 'family' }} />)
+        render(<Table collection={ collection } columns={ columns } sortBy={{ column: 'family' }} />)
 
         const nameHeader = screen.getAllByRole('columnheader')[0]
         await userEvent.click(nameHeader)
@@ -525,7 +525,7 @@ describe('Table', () => {
       })
 
       test('toggles sort direction when clicking the sorting header', async () => {
-        render(<Table collection={ collection } columns={ columns } sortBy={{ by: 'family', direction: 'asc'}} />)
+        render(<Table collection={ collection } columns={ columns } sortBy={{ column: 'family', direction: 'asc'}} />)
 
         const familyHeader = screen.getAllByRole('columnheader')[1]
         await userEvent.click(familyHeader)
@@ -540,7 +540,7 @@ describe('Table', () => {
       })
 
       test('sorts a paginated collection', () => {
-        render( <Table collection={ longCollection } columns={ columns } sortBy={{ by: 'family' }} paginate={ 2 } />)
+        render( <Table collection={ longCollection } columns={ columns } sortBy={{ column: 'family' }} paginate={ 2 } />)
 
         // Names in expected order
         const [dog, cat] = getNameCellsContent()

@@ -1,6 +1,6 @@
 import './App.css'
-import Table from "./components/Table/Table.tsx";
 import {TableColumn} from "./components/Table/types/types.ts";
+import DataTable from './components/Table/DataTable.tsx'
 
 type Animal = {
   id: number,
@@ -34,7 +34,7 @@ function App() {
   return (
     <>
       <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        <Table collection={ collection } columns={ columns } sort={{ by: 'family' }} />
+        <DataTable collection={ collection } columns={ columns } sortBy={{ column: 'family' }} />
       </div>
     </>
   )
