@@ -1,5 +1,6 @@
 import {isValidElement, ReactNode, useState} from 'react'
 import {Entity, FilterRange, TableColumn, TableFilter, TableProps, TableSort} from './types/types.ts'
+import styles from './css/Table.module.css'
 
 const Table = <T extends Entity>(
 {
@@ -46,29 +47,41 @@ const Table = <T extends Entity>(
     : []
 
   return (
-    <>
-      <table>
-        <thead>
-          <tr>
+    <div className={ styles.tableResponsive }>
+      <table className={ styles.table }>
+        <thead className={ styles.tableHeader }>
+          <tr className={ styles.tableRow }>
             { columns.map(col =>
-              <th key={ col.name } onClick={ ()=> handleSortChange(col.name) }>{ col.name }</th>)
-            }
+              <th
+                key={ col.name }
+                className={`${styles.tableCell} ${sort?.column === col.name ? `${styles.sort} ${styles[sort.direction || 'asc']}` : ''}`}
+                onClick={() => handleSortChange(col.name)}>{col.name}
+              </th>
+            )}
           </tr>
         </thead>
-        <tbody>
+        <tbody className={ styles.tableBody }>
           { rows?.length
             ? rows.map(item =>
-              <tr key={ item.id }>
-                { columns.map(column =>
-                  <td key={ `${item.id}-${column.name}` }>
-                    { column.data(item) }
-                  </td>)
-                }
+              <tr key={ item.id } className={ styles.tableRow }>
+                { columns.map(column => {
+                  const data = column.data(item)
+                  const value = extractValue(data)
+                  const valueSize = determineValueSize(value)
+
+                  return (
+                    <td key={`${item.id}-${column.name}`} className={ styles.tableCell }>
+                      <div className={ styles[`tableCell${valueSize}`] }>
+                        { column.format ? column.format(value) : data }
+                      </div>
+                    </td>
+                  )
+                })}
               </tr>
             )
             : <tr key='empty-message'>
-              <td>{ noEntriesMessage || 'No data available' }</td>
-            </tr>
+                <td>{ noEntriesMessage || 'No data available' }</td>
+              </tr>
           }
         </tbody>
       </table>
@@ -111,7 +124,7 @@ const Table = <T extends Entity>(
           </nav>
         </div>
       }
-    </>
+    </div>
   )
 }
 
@@ -126,6 +139,21 @@ const extractValue = (node: ReactNode): string => {
     return extractValue(node.props.children)
 
   return ''
+}
+
+const determineValueSize = (value: string) => {
+  const valueLength = value.length
+
+  if (valueLength < 3)
+    return 'Xs'
+
+  if (valueLength < 11)
+    return 'Sm'
+
+  if (valueLength < 21)
+    return 'Md'
+
+  return 'Lg'
 }
 
 const applySearchAndFilter = <T extends Entity>(

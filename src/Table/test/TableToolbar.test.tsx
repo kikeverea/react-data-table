@@ -13,6 +13,13 @@ describe('Table Toolbar', () => {
       expect(searchBar).toBeDefined()
     })
 
+    test('Shows given placeholder', () => {
+      render(<TableToolbar searchPlaceholder='Test placeholder' />)
+
+      const searchBar = screen.getByPlaceholderText('Test placeholder')
+      expect(searchBar).toBeDefined()
+    })
+
     test("Doesn't show search bar if indicated", () => {
       render(<TableToolbar showSearch={ false }/>)
 
@@ -26,7 +33,7 @@ describe('Table Toolbar', () => {
       render(<TableToolbar onSearchChange={ onSearchChangeMock }/>)
 
       const searchBar = screen.getByRole('textbox')
-      await userEvent.type(searchBar, "Hello")
+      await userEvent.type(searchBar, 'Hello')
 
       expect(onSearchChangeMock).toHaveBeenCalledWith('Hello')
     })

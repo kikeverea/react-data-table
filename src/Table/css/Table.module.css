@@ -1,0 +1,80 @@
+.tableResponsive {
+  overflow-wrap: break-word;
+  overflow-x: auto;
+  scrollbar-color: rgb(241, 241, 244) rgba(0, 0, 0, 0);    /* <thumb-color> <track-color> */
+  scrollbar-width: thin;
+  unicode-bidi: isolate;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+.table {
+  table-layout: fixed;
+  border-collapse: separate;
+  vertical-align: center;
+}
+
+.tableHeader {
+  text-align: left;
+}
+
+.tableHeader .tableCell {
+  cursor: pointer;
+  color: rgb(111, 114, 135);
+}
+
+.tableHeader .tableCell.sort.asc::after {
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-image: url('../resources/chevron-up.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: bottom;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.tableHeader .tableCell.sort.desc::after {
+  content: "";
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-image: url('../resources/chevron-down.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.tableCell {
+  border-bottom: 1px solid rgb(241, 241, 244);
+  padding: 1rem 0.6rem;
+}
+
+.tableCell:last-of-type {
+  text-align: right;
+}
+
+.tableCellXs {
+  width: 60px;
+}
+
+.tableCellSm {
+  width: 120px;
+}
+
+.tableCellMd {
+  width: 180px;
+}
+
+.tableCellLg {
+  width: 300px;
+}
+
+.tableCell:last-child {
+  width: 1%;
+  text-wrap: nowrap;
+}

@@ -13,12 +13,17 @@ type Animal = {
 
 function App() {
 
+  const formatDate = (date: string): string => {
+    const [year, month, day] = date.split('-')
+    return `${day}-${month}-${year}`
+  }
+
   const columns: TableColumn<Animal>[] = [
-    { name: 'Name', data: item => `${item.name}`},
-    { name: 'Family', data: item => `${item.family}`},
-    { name: 'Type', data: item => `${item.type}`},
-    { name: 'Age', data: item => `${item.age}`, type: 'number'},
-    { name: 'Birth', data: item => `${item.birth}`, type: 'date'},
+    { name: 'Name', data: item => item.name},
+    { name: 'Family', data: item => item.family},
+    { name: 'Type', data: item => item.type},
+    { name: 'Age', data: item => item.age, type: 'number'},
+    { name: 'Birth', data: item => item.birth, format: formatDate , type: 'date'},
   ]
 
   const collection: Animal[] = [

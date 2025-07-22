@@ -9,6 +9,11 @@ export type TestData = {
   birth: string,
 }
 
+export const formatDate = (date: string): string => {
+  const [year, month, day] = date.split('-')
+  return `${day}-${month}-${year}`
+}
+
 export const dataRows = () => {
   return screen.getAllByRole('row').slice(1)    // rows excluding the header row
 }
@@ -31,7 +36,7 @@ export const getTestData = ({ collection, row, col }: { collection: TestData[] ,
       return String(dataRow.age)
 
     case 4 :
-      return String(dataRow.birth)
+      return String(formatDate(dataRow.birth))
   }
 }
 
