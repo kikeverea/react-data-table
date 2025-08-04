@@ -13,6 +13,13 @@ describe('Table Toolbar', () => {
       expect(searchBar).toBeDefined()
     })
 
+    test('Shows given placeholder', () => {
+      render(<TableToolbar searchPlaceholder='Test placeholder' />)
+
+      const searchBar = screen.getByPlaceholderText('Test placeholder')
+      expect(searchBar).toBeDefined()
+    })
+
     test("Doesn't show search bar if indicated", () => {
       render(<TableToolbar showSearch={ false }/>)
 
@@ -26,7 +33,7 @@ describe('Table Toolbar', () => {
       render(<TableToolbar onSearchChange={ onSearchChangeMock }/>)
 
       const searchBar = screen.getByRole('textbox')
-      await userEvent.type(searchBar, "Hello")
+      await userEvent.type(searchBar, 'Hello')
 
       expect(onSearchChangeMock).toHaveBeenCalledWith('Hello')
     })
@@ -38,7 +45,7 @@ describe('Table Toolbar', () => {
       { id: 2, name: 'Dog', family: 'Canine', type: 'Pet', age: 5, birth: '2020-07-14' }
     ]
 
-    test("Doesn't show filter no columns given", () => {
+    test("Doesn't show filter if no columns given", () => {
       render(<TableToolbar collection={[]}/>)
 
       const showFilterButton = screen.queryByLabelText('show filter')
@@ -74,13 +81,13 @@ describe('Table Toolbar', () => {
       expect(typeParam).toBeDefined()
     })
 
-    test('Calls filter change handler', async () => {
+    test('Calls checkbox filter change handler', async () => {
       const onFilterChangeMock = vi.fn()
 
       render(
         <TableToolbar
           showSearch={ false }
-          filterColumns={['family', 'type', ['age', 'range', 'number']]}
+          filterColumns={['family']}
           collection={ collection }
           onFilterChange={ onFilterChangeMock }
         />
@@ -89,29 +96,38 @@ describe('Table Toolbar', () => {
       const filterButton = screen.getByLabelText('show filter')
       await userEvent.click(filterButton)
 
-      const felineCheckbox = screen.getAllByRole('checkbox')[0]
-      await userEvent.click(felineCheckbox)
-      expect(onFilterChangeMock).toHaveBeenCalledWith('family', { name: 'Feline', checked: true })
-
-      const canineCheckbox = screen.getAllByRole('checkbox')[1]
-      await userEvent.click(canineCheckbox)
-      expect(onFilterChangeMock).toHaveBeenCalledWith('family', { name: 'Feline', checked: true })
-
-      const petCheckbox = screen.getAllByRole('checkbox')[2]
-      await userEvent.click(petCheckbox)
-      expect(onFilterChangeMock).toHaveBeenCalledWith('type', { name: 'Pet', checked: true })
+      const felineCheckbox = screen.getByRole('checkbox', { name: 'Feline' })
 
       await userEvent.click(felineCheckbox)
-      expect(onFilterChangeMock).toHaveBeenCalledWith('family', { name: 'Feline', checked: false })
+      expect(onFilterChangeMock).toHaveBeenLastCalledWith('family', { name: 'Feline', checked: true })
 
-      const minAge = screen.getByLabelText('age min')
+      await userEvent.click(felineCheckbox)
+      expect(onFilterChangeMock).toHaveBeenLastCalledWith('family', { name: 'Feline', checked: false })
+    })
+
+    test('Calls range box filter change handler', async () => {
+      const onFilterChangeMock = vi.fn()
+
+      render(
+        <TableToolbar
+          showSearch={ false }
+          filterColumns={[['age', 'range', 'number']]}
+          collection={ collection }
+          onFilterChange={ onFilterChangeMock }
+        />
+      )
+
+      const filterButton = screen.getByLabelText('show filter')
+      await userEvent.click(filterButton)
+
+      const minAge = screen.getByRole('textbox', { name: 'age min' })
+      const maxAge = screen.getByRole('textbox', { name: 'age max' })
+
       await userEvent.type(minAge, '5')
-      expect(onFilterChangeMock).toHaveBeenCalledWith('age', { min: 5 })
+      expect(onFilterChangeMock).toHaveBeenLastCalledWith('age', { min: 5 })
 
-      const maxAge = screen.getByLabelText('age max')
       await userEvent.type(maxAge, '10')
-      expect(onFilterChangeMock).toHaveBeenCalledWith('age', { max: 10 })
-
+      expect(onFilterChangeMock).toHaveBeenLastCalledWith('age', { max: 10 })
     })
   })
 

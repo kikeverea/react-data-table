@@ -1,6 +1,6 @@
 import {render, screen, within} from '@testing-library/react'
 import { TableColumn } from '../types/types.ts'
-import {getNameCellsContent, TestData, dataRows, getTestData} from './testUtils.ts'
+import {getNameCellsContent, TestData, dataRows, getTestData, formatDate} from './testUtils.ts'
 import DataTable from '../DataTable.tsx'
 import userEvent from '@testing-library/user-event'
 
@@ -19,7 +19,7 @@ const columns: TableColumn<TestData>[] = [
   { name: 'Family', data: item => `${item.family}`},
   { name: 'Type', data: item => `${item.type}`},
   { name: 'Age', data: item => `${item.age}`, type: 'number' },
-  { name: 'Birth', data: item => `${item.birth}`, type: 'date' },
+  { name: 'Birth', data: item => `${item.birth}`, format: formatDate, type: 'date' },
 ]
 
 describe('Data Table', () => {
@@ -146,8 +146,8 @@ describe('Data Table', () => {
         const showFilterButton = screen.getByLabelText('show filter')
         await userEvent.click(showFilterButton)
 
-        const felineCheckbox = screen.getByLabelText('Feline')
-        const petCheckbox = screen.getByLabelText('Pet')
+        const felineCheckbox = screen.getByRole('checkbox', { name: 'Feline' })
+        const petCheckbox = screen.getByRole('checkbox', { name: 'Pet' })
 
         await userEvent.click(felineCheckbox)
 
@@ -165,6 +165,15 @@ describe('Data Table', () => {
 
         expect(felinePetRows.length).toBe(1)
         expect(petCat).toBe('Cat')
+
+        await userEvent.click(petCheckbox)
+
+        const felineRowsThen = dataRows()
+        const [catThen, lionThen] = getNameCellsContent(felineRows)
+
+        expect(felineRowsThen.length).toBe(2)
+        expect(lionThen).toBe('Lion')
+        expect(catThen).toBe('Cat')
       })
 
       test('renders rows that pass the range filter', async () => {

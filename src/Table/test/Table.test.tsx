@@ -4,7 +4,7 @@ import Table from '../Table.tsx'
 import { TableColumn } from '../types/types.ts'
 
 import { parse } from 'date-fns'
-import {dataRows, getNameCellsContent, getTestData, TestData} from './testUtils.ts'
+import { formatDate, dataRows, getNameCellsContent, getTestData, TestData } from './testUtils.ts'
 
 describe('Table', () => {
 
@@ -13,7 +13,7 @@ describe('Table', () => {
     { name: 'Family', data: item => `${item.family}`},
     { name: 'Type', data: item => `${item.type}`},
     { name: 'Age', data: item => `${item.age}`, type: 'number' },
-    { name: 'Birth', data: item => `${item.birth}`, type: 'date' },
+    { name: 'Birth', data: item => `${item.birth}`, format: formatDate, type: 'date' },
   ]
 
   const collection: TestData[] = [
@@ -77,8 +77,7 @@ describe('Table', () => {
       rows.slice(1).forEach((row, rowIndex) => {
         const cells = within(row).getAllByRole('cell')
         cells.forEach((cell, colIndex) => {
-          expect(cell.textContent)
-            .toBe(getTestData({ collection, row: rowIndex, col: colIndex}))
+          expect(cell.textContent).toBe(getTestData({ collection, row: rowIndex, col: colIndex }))
         })
       })
     })

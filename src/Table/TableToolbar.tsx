@@ -22,10 +22,16 @@ const TableToolbar = (
       { showSearch &&
         <input type='text' onInput={ e => onSearchChange(e.currentTarget.value) } aria-label='table search'/>
       }
-      { hasStructure && (
-          showFilter
-            ? <TableFilter filterStructure={ filterStructure } onFilterValueChanged={ onFilterChange } />
-            : <button aria-label='show filter' onClick={ () => setShowFilter(true)}>FILTER</button>
+      { !!hasStructure &&
+        (showFilter
+          ? <TableFilter filterStructure={ filterStructure } onFilterValueChanged={ onFilterChange } />
+          : <button
+              className={ styles.filterButton }
+              aria-label='show filter'
+              onClick={ () => setShowFilter(true)}
+            >
+              <FilterIcon className={ styles.filterButtonIcon }/> Filter
+            </button>
         )
       }
     </div>

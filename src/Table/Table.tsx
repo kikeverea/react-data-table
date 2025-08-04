@@ -236,7 +236,7 @@ const evaluateFilter = (filter: string[] | FilterRange, value: string): boolean 
     else return true
   }
   else
-    return filter.some(filterValue => value.toLowerCase().includes(filterValue.toLowerCase()))
+    return !filter.length || filter.some(filterValue => value.toLowerCase().includes(filterValue.toLowerCase()))
 }
 
 const pageRange = (currentPage: number, itemsPerPage: number | undefined, collectionLength: number): readonly [number, number]=> {

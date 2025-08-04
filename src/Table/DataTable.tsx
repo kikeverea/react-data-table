@@ -57,19 +57,14 @@ const buildTableFilter = (column: string, filter: TableFilter, value: FilterEven
 
   if (isCheckboxEvent(value)) {
 
-    let valuesArray = filter[column]
-
-    if (!valuesArray) {
-      valuesArray = []
-      filter[column] = valuesArray
-    }
+    const valuesArray = filter[column] || []
 
     assertValueAsArray(valuesArray)
 
     if (value.checked)
-      valuesArray.push(value.name)
+      filter[column] = [ ...valuesArray, value.name ]
     else
-      valuesArray.filter(name => name !== value.name)
+      filter[column] = valuesArray.filter(name => name.toLowerCase() !== value.name.toLowerCase())
   }
   else {
     // is range event
