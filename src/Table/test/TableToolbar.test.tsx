@@ -126,10 +126,7 @@ describe('Table Toolbar', () => {
       const felineCheckbox = screen.getByRole('checkbox', { name: 'Feline' })
 
       await userEvent.click(felineCheckbox)
-      expect(onFilterChangeMock).toHaveBeenLastCalledWith('family', { name: 'Feline', checked: true })
-
-      await userEvent.click(felineCheckbox)
-      expect(onFilterChangeMock).toHaveBeenLastCalledWith('family', { name: 'Feline', checked: false })
+      expect(onFilterChangeMock).toHaveBeenLastCalledWith({ family: ['Feline'] })
     })
 
     test('Calls range box filter change handler', async () => {
@@ -151,10 +148,10 @@ describe('Table Toolbar', () => {
       const maxAge = screen.getByRole('textbox', { name: 'age max' })
 
       await userEvent.type(minAge, '5')
-      expect(onFilterChangeMock).toHaveBeenLastCalledWith('age', { min: 5 })
+      expect(onFilterChangeMock).toHaveBeenLastCalledWith({ age: { min: 5 }})
 
       await userEvent.type(maxAge, '10')
-      expect(onFilterChangeMock).toHaveBeenLastCalledWith('age', { max: 10 })
+      expect(onFilterChangeMock).toHaveBeenLastCalledWith({ age: { min: 5, max: 10 }})
     })
   })
 

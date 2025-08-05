@@ -9,12 +9,12 @@ import FilterIcon from './resources/filter.svg?react'
 const TableToolbar = (
 {
   collection,
+  filter,
   filterColumns,
   showSearch=true,
   searchPlaceholder,
   onSearchChange=() => {},
   onFilterChange=() => {},
-  onFilterReset=() => {}
 }: TableToolbarProps) => {
 
   const [showFilter, setShowFilter] = useState<boolean>(false)
@@ -43,9 +43,9 @@ const TableToolbar = (
             <div className={styles.filter}>
               <TableFilter
                 filterStructure={ filterStructure }
-                onFilterValueChanged={ onFilterChange }
+                filter={ filter }
+                onFilterChange={ onFilterChange }
                 onCloseFilter={ () => setShowFilter(false) }
-                onFilterReset={ onFilterReset }
               />
             </div>
           }

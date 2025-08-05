@@ -41,11 +41,8 @@ export type TableToolbarProps = {
   searchPlaceholder?: string,
   filterColumns?: FilterColumns,
   onSearchChange?: (search: string) => void,
-  onFilterChange?: (
-    columnName: string,
-    value: FilterEventValue
-  ) => void,
-  onFilterReset?: () => void,
+  filter?: TableFilter,
+  onFilterChange?: (filter: TableFilter) => void
 }
 
 
@@ -70,12 +67,9 @@ export type FilterRange = {
 
 export type TableFilterProps = {
   filterStructure: FilterStructure,
-  onFilterValueChanged: (
-    columnName: string,
-    value: FilterEventValue
-  ) => void,
-  onCloseFilter: () => void,
-  onFilterReset: () => void,
+  filter: TableFilter,
+  onFilterChange: (filter: TableFilter) => void,
+  onCloseFilter: () => void
 }
 
 export type FilterEventValue =

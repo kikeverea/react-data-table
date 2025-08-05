@@ -1,6 +1,4 @@
 import {
-  FilterEventValue,
-  FilterRange,
   TableFilter, DataTableProps, Entity
 } from './types/types.ts'
 
@@ -22,11 +20,6 @@ const DataTable = <T extends Entity> (
   const [filter, setFilter] = useState<TableFilter>({})
   const [search, setSearch] = useState<string>('')
 
-  const updateFilter = (column: string, value: FilterEventValue) => {
-    const tableFilter: TableFilter = buildTableFilter(column, filter, value)
-    setFilter({ ...tableFilter })
-  }
-
   return (
     <>
       { (showSearch || filter?.length) &&
@@ -35,8 +28,8 @@ const DataTable = <T extends Entity> (
           filterColumns={ filterColumns }
           showSearch={ showSearch }
           onSearchChange={ setSearch }
-          onFilterChange={ updateFilter }
-          onFilterReset={ () => setFilter({}) }
+          filter={ filter }
+          onFilterChange={ setFilter }
         />
       }
       <Table
@@ -54,33 +47,33 @@ const DataTable = <T extends Entity> (
 
 export default DataTable
 
-const buildTableFilter = (column: string, filter: TableFilter, value: FilterEventValue): TableFilter => {
+// const buildTableFilter = (column: string, filter: TableFilter, value: FilterEventValue): TableFilter => {
+//
+//   if (isCheckboxEvent(value)) {
+//
+//     const valuesArray = filter[column] || []
+//
+//     assertValueAsArray(valuesArray)
+//
+//     if (value.checked)
+//       filter[column] = [ ...valuesArray, value.name ]
+//     else
+//       filter[column] = valuesArray.filter(name => name.toLowerCase() !== value.name.toLowerCase())
+//   }
+//   else {
+//     // is range event
+//
+//     const filterValue = filter[column]
+//     filter[column] = { ...(filterValue || {}), ...value }
+//   }
+//
+//   return filter
+// }
 
-  if (isCheckboxEvent(value)) {
-
-    const valuesArray = filter[column] || []
-
-    assertValueAsArray(valuesArray)
-
-    if (value.checked)
-      filter[column] = [ ...valuesArray, value.name ]
-    else
-      filter[column] = valuesArray.filter(name => name.toLowerCase() !== value.name.toLowerCase())
-  }
-  else {
-    // is range event
-
-    const filterValue = filter[column]
-    filter[column] = { ...(filterValue || {}), ...value }
-  }
-
-  return filter
-}
-
-const isCheckboxEvent = (value: any): value is { name: string, checked: boolean } =>
-  value.name && value.checked !== undefined
-
-function assertValueAsArray (value: string[] | FilterRange): asserts value is string[] {
-  if (!Array.isArray(value))
-    throw new Error(`Expected value to be a string array, but is a ${typeof value}`)
-}
+// const isCheckboxEvent = (value: any): value is { name: string, checked: boolean } =>
+//   value.name && value.checked !== undefined
+//
+// function assertValueAsArray (value: string[] | FilterRange): asserts value is string[] {
+//   if (!Array.isArray(value))
+//     throw new Error(`Expected value to be a string array, but is a ${typeof value}`)
+// }

@@ -1,10 +1,24 @@
-import {StructureRange, TableFilterProps} from './types/types.ts'
+import {FilterRange, StructureRange, TableFilterProps} from './types/types.ts'
 import {ChangeEvent} from 'react'
 import styles from './css/TableFilter.module.css'
 
 const isRange = (value: any): value is StructureRange => value.range
 
-const TableFilter = ({ filterStructure, onFilterValueChanged, onCloseFilter, onFilterReset }: TableFilterProps) => {
+const TableFilter = ({ filterStructure, filter={}, onFilterChange, onCloseFilter }: TableFilterProps) => {
+
+  const handleFilterValueChanged = (e: ChangeEvent<HTMLInputElement>, column: string, valueName: string): void => {
+    const checkbox = e.currentTarget
+
+    const valuesArray = filter[column] || []
+    assertAsArray(valuesArray)
+
+    if (checkbox.checked)
+      filter[column] = [ ...valuesArray, valueName ]
+    else
+      filter[column] = valuesArray.filter(name => name.toLowerCase() !== valueName.toLowerCase())
+
+    onFilterChange({ ...filter })
+  }
 
   const handleRangeValueChanged = (
     e: ChangeEvent<HTMLInputElement>,
@@ -19,12 +33,17 @@ const TableFilter = ({ filterStructure, onFilterValueChanged, onCloseFilter, onF
       ? newValue
       : parseFloat(newValue)
 
-    onFilterValueChanged(column, { [rangeTarget]: value, parser: range.parser })
-  }
+    const filterValue = filter[column] || {}
+    assertAsRange(filterValue)
 
-  const handleFilterValueChanged = (e: ChangeEvent<HTMLInputElement>, column: string, valueName: string): void => {
-    const checkbox = e.currentTarget
-    onFilterValueChanged(column, { name: valueName, checked: checkbox.checked })
+    const parser = range.parser ? { parser: range.parser } : {}
+
+    filter[column] = {
+      ...filterValue,
+      [rangeTarget]: value, ...parser
+    }
+
+    onFilterChange({ ...filter })
   }
 
   return (
@@ -32,12 +51,11 @@ const TableFilter = ({ filterStructure, onFilterValueChanged, onCloseFilter, onF
       { filterStructure
         ? Object.entries(filterStructure).map(([columnName, value]) => {
 
-          console.log('columnName', columnName)
-          console.log('value', value)
+          const filterValues = filter[columnName]
 
           return (
-            <div key={ columnName } className={ styles.filterColumnContainer } role='group' aria-labelledby={`${columnName}-filter-label`}>
-              <div id={`${columnName}-filter-label`} className={ styles.filterColumnLabel } aria-label={ columnName }>
+            <div key={ columnName } className={ styles.filterColumnContainer } role='group' aria-label={ columnName }>
+              <div id={`${columnName.toLowerCase()}-filter-label`} className={ styles.filterColumnLabel } role='label' >
                 { columnName }
               </div>
               { isRange(value)
@@ -48,9 +66,7 @@ const TableFilter = ({ filterStructure, onFilterValueChanged, onCloseFilter, onF
                         name='min'
                         type="text"
                         aria-label={ `${columnName.toLowerCase()} min` }
-                        onChange= { e =>
-                          handleRangeValueChanged(e, columnName, value, 'min')
-                        }
+                        onChange= { e => handleRangeValueChanged(e, columnName, value, 'min') }
                       />
                       <label htmlFor={ `${columnName.toLowerCase()}-max` }>Max</label>
                       <input
@@ -58,9 +74,7 @@ const TableFilter = ({ filterStructure, onFilterValueChanged, onCloseFilter, onF
                         name='max'
                         aria-label={ `${columnName.toLowerCase()} max` }
                         type="text"
-                        onChange= { e =>
-                          handleRangeValueChanged(e, columnName, value, 'max')
-                        }
+                        onChange= { e => handleRangeValueChanged(e, columnName, value, 'max') }
                       />
                     </>
                   : <div className={ styles.checkboxesContainer }>
@@ -70,6 +84,7 @@ const TableFilter = ({ filterStructure, onFilterValueChanged, onCloseFilter, onF
                             type='checkbox'
                             name={ valueName.toLowerCase() }
                             className={ styles.checkboxInput }
+                            checked={ !!filterValues && isInValues(valueName, filterValues as string[]) }
                             onChange={(e) => handleFilterValueChanged(e, columnName, valueName) }
                           />
                           <span className={ styles.checkboxBox } aria-hidden="true"></span>
@@ -85,7 +100,7 @@ const TableFilter = ({ filterStructure, onFilterValueChanged, onCloseFilter, onF
         : 'No data available'
       }
       <div className={ styles.buttonsContainer }>
-        <button className={ `${styles.button} ${styles.resetButton}` } onClick={ onFilterReset }>
+        <button className={ `${styles.button} ${styles.resetButton}` } onClick={ () => onFilterChange({}) }>
           Reset
         </button>
         <button className={ `${styles.button} ${styles.closeButton}` } onClick={ onCloseFilter }>
@@ -94,6 +109,19 @@ const TableFilter = ({ filterStructure, onFilterValueChanged, onCloseFilter, onF
       </div>
     </div>
   )
+}
+
+const isInValues = (value: string, values: string[]): boolean =>
+  values.includes(value)
+
+function assertAsRange(value: string[] | FilterRange): asserts value is FilterRange {
+  if (Array.isArray(value))
+    throw new Error(`Expected value to be a 'filter range', but is a ${typeof value}`)
+}
+
+function assertAsArray (value: string[] | FilterRange): asserts value is string[] {
+  if (!Array.isArray(value))
+    throw new Error(`Expected value to be a string array, but is a ${typeof value}`)
 }
 
 export default TableFilter
