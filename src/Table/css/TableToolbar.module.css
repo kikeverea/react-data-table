@@ -44,6 +44,7 @@
   top: 100%;
   right: 0;
   width: 80vw;
+  animation: elevateUp 0.3s ease-out both;
 }
 
 .filterButton {
@@ -88,6 +89,17 @@
 
 .filterButton:hover .filterButtonIcon path:last-child {
   fill: currentColor;
+}
+
+@keyframes elevateUp {
+  from {
+    transform: translateY(10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @media (min-width: 600px) {
