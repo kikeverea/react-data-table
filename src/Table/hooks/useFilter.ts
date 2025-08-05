@@ -3,7 +3,7 @@ import {Dictionary, FilterColumns, FilterStructure, RangeFilter, StructureRange}
 
 type VersionedStructure = readonly [FilterStructure | {}, number]
 
-const useFilter = (columns?: FilterColumns, collection?: Dictionary<string|number>[]): FilterStructure => {
+const useFilterStructure = (columns?: FilterColumns, collection?: Dictionary<string|number>[]): FilterStructure => {
 
   const filterVersion = useRef<number>(0)
 
@@ -76,4 +76,4 @@ const extractCheckboxesFilter = (column: string, collection: Dictionary<string|n
 const isRangeColumn = (column: string | any[]): column is RangeFilter =>
   Array.isArray(column) && column[1] === 'range'
 
-export default useFilter
+export default useFilterStructure

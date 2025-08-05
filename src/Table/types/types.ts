@@ -8,6 +8,7 @@ export type Entity = { id: number | string }
 export type TableColumn<T extends Entity> = {
   name: string,
   data: (item: T) => ReactNode,
+  format?: (value: string) => string,
   type?: 'text' | 'number' | 'date'
 }
 
@@ -37,12 +38,14 @@ export type TableToolbarProps = {
   collection?: Dictionary<string|number>[]
   search?: string,
   showSearch?: boolean,
+  searchPlaceholder?: string,
   filterColumns?: FilterColumns,
   onSearchChange?: (search: string) => void,
   onFilterChange?: (
     columnName: string,
     value: FilterEventValue
-  ) => void
+  ) => void,
+  onFilterReset?: () => void,
 }
 
 
@@ -70,7 +73,9 @@ export type TableFilterProps = {
   onFilterValueChanged: (
     columnName: string,
     value: FilterEventValue
-  ) => void
+  ) => void,
+  onCloseFilter: () => void,
+  onFilterReset: () => void,
 }
 
 export type FilterEventValue =

@@ -1,9 +1,10 @@
 import {StructureRange, TableFilterProps} from './types/types.ts'
 import {ChangeEvent} from 'react'
+import styles from './css/TableFilter.module.css'
 
 const isRange = (value: any): value is StructureRange => value.range
 
-const TableFilter = ({ filterStructure, onFilterValueChanged }: TableFilterProps) => {
+const TableFilter = ({ filterStructure, onFilterValueChanged, onCloseFilter, onFilterReset }: TableFilterProps) => {
 
   const handleRangeValueChanged = (
     e: ChangeEvent<HTMLInputElement>,
@@ -27,13 +28,18 @@ const TableFilter = ({ filterStructure, onFilterValueChanged }: TableFilterProps
   }
 
   return (
-    <div role='dialog' aria-modal="true" aria-label="table filter">
+    <div role='dialog' aria-modal="true" aria-label="table filter" className={ styles.filterModal }>
       { filterStructure
         ? Object.entries(filterStructure).map(([columnName, value]) => {
 
+          console.log('columnName', columnName)
+          console.log('value', value)
+
           return (
-            <fieldset key={ columnName }>
-              <legend aria-label={ columnName }>{ columnName }</legend>
+            <div key={ columnName } className={ styles.filterColumnContainer } role='group' aria-labelledby={`${columnName}-filter-label`}>
+              <div id={`${columnName}-filter-label`} className={ styles.filterColumnLabel } aria-label={ columnName }>
+                { columnName }
+              </div>
               { isRange(value)
                   ? <>
                       <label htmlFor={ `${columnName.toLowerCase()}-min` }>Min</label>
@@ -57,21 +63,35 @@ const TableFilter = ({ filterStructure, onFilterValueChanged }: TableFilterProps
                         }
                       />
                     </>
-                  : value.map((valueName) =>
-                      <label key={ valueName }>
-                        <input
-                          type='checkbox'
-                          name={ valueName.toLowerCase() }
-                          onChange={ (e) => handleFilterValueChanged(e, columnName, valueName) }
-                        />
-                        { valueName }
-                      </label>
-                    )
+                  : <div className={ styles.checkboxesContainer }>
+                      { value.map((valueName) =>
+                        <label key={ valueName } className={ styles.filterCheckbox }>
+                          <input
+                            type='checkbox'
+                            name={ valueName.toLowerCase() }
+                            className={ styles.checkboxInput }
+                            onChange={(e) => handleFilterValueChanged(e, columnName, valueName) }
+                          />
+                          <span className={ styles.checkboxBox } aria-hidden="true"></span>
+                          <span className={ styles.checkboxLabel }>
+                            { valueName }
+                          </span>
+                        </label>
+                      )}
+                    </div>
               }
-            </fieldset>
+            </div>
           )})
         : 'No data available'
       }
+      <div className={ styles.buttonsContainer }>
+        <button className={ `${styles.button} ${styles.resetButton}` } onClick={ onFilterReset }>
+          Reset
+        </button>
+        <button className={ `${styles.button} ${styles.closeButton}` } onClick={ onCloseFilter }>
+          Close
+        </button>
+      </div>
     </div>
   )
 }

@@ -205,6 +205,30 @@ describe('Data Table', () => {
         expect(maxRows.length).toBe(1)
         expect(catMax).toBe('Cat')
       })
+
+      test('renders all rows when filter is reset', async () => {
+        render(<DataTable collection={ collection } columns={ columns } filter={['Family', 'Type']} />)
+
+        const showFilterButton = screen.getByLabelText('show filter')
+        await userEvent.click(showFilterButton)
+
+        const felineCheckbox = screen.getByRole('checkbox', { name: 'Feline' })
+        const petCheckbox = screen.getByRole('checkbox', { name: 'Pet' })
+
+        await userEvent.click(felineCheckbox)
+        await userEvent.click(petCheckbox)
+
+        const rows = dataRows()
+        expect(rows.length).toBe(1)
+
+        const filter = screen.getByRole('dialog')
+        const resetButton = within(filter).getByRole('button', { name: /reset/i })
+
+        await userEvent.click(resetButton)
+        const allRows = dataRows()
+
+        expect(allRows.length).toBe(collection.length)
+      })
     })
   })
 })

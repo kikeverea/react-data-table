@@ -15,9 +15,17 @@ describe('Table Filter', () => {
   }
 
   const onFilterChangeMock = vi.fn()
+  const onCloseFilterMock = vi.fn()
+  const onFilterResetMock = vi.fn()
 
   beforeEach(() => {
-    render(<TableFilter filterStructure={ filter } onFilterValueChanged={ onFilterChangeMock }/>)
+    render(
+      <TableFilter
+        filterStructure={ filter }
+        onFilterValueChanged={ onFilterChangeMock }
+        onCloseFilter={ onCloseFilterMock }
+        onFilterReset={ onFilterResetMock }
+      />)
   })
 
   test('component has a dialog role, aria modal and is labeled', () => {
@@ -99,5 +107,19 @@ describe('Table Filter', () => {
 
     await userEvent.type(max, '2021-03-22')   // appends to the existing text
     expect(onFilterChangeMock).toHaveBeenCalledWith('Birth', { max: '2021-03-22', parser: parser })
+  })
+
+  test('clicking close button calls its handler', async () => {
+    const button = screen.getByRole('button', { name: /close/i })
+    await userEvent.click(button)
+
+    expect(onCloseFilterMock).toHaveBeenCalledTimes(1)
+  })
+
+  test('clicking reset button calls its handler', async () => {
+    const button = screen.getByRole('button', { name: /reset/i })
+    await userEvent.click(button)
+
+    expect(onFilterResetMock).toHaveBeenCalledTimes(1)
   })
 })

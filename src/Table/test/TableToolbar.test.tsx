@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import {render, screen, within} from '@testing-library/react'
 import TableToolbar from '../TableToolbar.tsx'
 import { TestData } from './testUtils.ts'
 import userEvent from '@testing-library/user-event'
@@ -69,16 +69,43 @@ describe('Table Toolbar', () => {
     test('Displays filter', async () => {
       render(<TableToolbar filterColumns={['family', 'type']} collection={ collection } />)
 
+      const filterThen = screen.queryByRole('dialog')
+      expect(filterThen).toBe(null)
+
       const showFilterButton = screen.getByLabelText('show filter')
       await userEvent.click(showFilterButton)
 
-      const filterElement = screen.getByLabelText('table filter')
-      const familyParam = screen.getByLabelText('family')
-      const typeParam = screen.getByLabelText('type')
+      const filter = screen.getByRole('dialog')
+      expect(filter).toBeDefined()
+    })
 
-      expect(filterElement).toBeDefined()
-      expect(familyParam).toBeDefined()
-      expect(typeParam).toBeDefined()
+    test('Hides filter', async () => {
+      render(<TableToolbar filterColumns={['family', 'type']} collection={ collection } />)
+
+      const showFilterButton = screen.getByLabelText('show filter')
+
+      await userEvent.click(showFilterButton)
+      const filter = screen.getByRole('dialog')
+      expect(filter).toBeDefined()
+
+      await userEvent.click(showFilterButton)
+      const hiddenFilter = screen.queryByRole('dialog')
+      expect(hiddenFilter).toBe(null)
+    })
+
+    test('Hides filter by clicking its close button', async () => {
+      render(<TableToolbar filterColumns={['family', 'type']} collection={ collection } />)
+
+      const showFilterButton = screen.getByLabelText('show filter')
+      await userEvent.click(showFilterButton)
+
+      const filter = screen.getByRole('dialog')
+
+      const closeButton = within(filter).queryByRole('button', { name: /close/i }) as HTMLButtonElement
+      await userEvent.click(closeButton)
+
+      const hiddenFilter = screen.queryByRole('dialog')
+      expect(hiddenFilter).toBe(null)
     })
 
     test('Calls checkbox filter change handler', async () => {

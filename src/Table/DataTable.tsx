@@ -36,6 +36,7 @@ const DataTable = <T extends Entity> (
           showSearch={ showSearch }
           onSearchChange={ setSearch }
           onFilterChange={ updateFilter }
+          onFilterReset={ () => setFilter({}) }
         />
       }
       <Table
