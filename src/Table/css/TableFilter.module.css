@@ -6,7 +6,7 @@
 }
 
 .filterColumnContainer {
-  padding: 6px 0;
+  padding: 8px 0;
 }
 
 .filterColumnLabel {
@@ -71,11 +71,33 @@
   border-color: #007bff;
 }
 
+.rangesContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  align-items: center;
+}
+
+.rangeInput {
+  width: 125px;
+  margin-left: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid rgb(234, 234, 234);
+  padding: 10px 13px 10px 13px;
+  font-size: 1rem;
+}
+
+.rangeInput:focus {
+  outline: none;
+  border: 1px solid rgb(220, 220, 220);
+}
+
 .buttonsContainer {
   display: flex;
   justify-content: end;
   align-items: center;
   gap: 1rem;
+  padding-top: 1rem;
 }
 
 .button {
