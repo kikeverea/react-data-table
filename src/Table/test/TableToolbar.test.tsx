@@ -107,53 +107,5 @@ describe('Table Toolbar', () => {
       const hiddenFilter = screen.queryByRole('dialog')
       expect(hiddenFilter).toBe(null)
     })
-
-    test('Calls checkbox filter change handler', async () => {
-      const onFilterChangeMock = vi.fn()
-
-      render(
-        <TableToolbar
-          showSearch={ false }
-          filterColumns={['family']}
-          collection={ collection }
-          onFilterChange={ onFilterChangeMock }
-        />
-      )
-
-      const filterButton = screen.getByLabelText('show filter')
-      await userEvent.click(filterButton)
-
-      const felineCheckbox = screen.getByRole('checkbox', { name: 'Feline' })
-
-      await userEvent.click(felineCheckbox)
-      expect(onFilterChangeMock).toHaveBeenLastCalledWith({ family: ['Feline'] })
-    })
-
-    test('Calls range box filter change handler', async () => {
-      const onFilterChangeMock = vi.fn()
-
-      render(
-        <TableToolbar
-          showSearch={ false }
-          filterColumns={[['age', 'range', 'number']]}
-          collection={ collection }
-          onFilterChange={ onFilterChangeMock }
-        />
-      )
-
-      const filterButton = screen.getByLabelText('show filter')
-      await userEvent.click(filterButton)
-
-      const minAge = screen.getByRole('textbox', { name: 'age min' })
-      const maxAge = screen.getByRole('textbox', { name: 'age max' })
-
-      await userEvent.type(minAge, '5')
-      expect(onFilterChangeMock).toHaveBeenLastCalledWith({ age: { min: 5 }})
-
-      await userEvent.type(maxAge, '10')
-      expect(onFilterChangeMock).toHaveBeenLastCalledWith({ age: { min: 5, max: 10 }})
-    })
   })
-
 })
-

@@ -4,46 +4,21 @@ import styles from './css/TableFilter.module.css'
 
 const isRange = (value: any): value is StructureRange => value.range
 
-const TableFilter = ({ filterStructure, filter={}, onFilterChange, onCloseFilter }: TableFilterProps) => {
+const TableFilter = ({ filterStructure, filter={}, dispatchFilterChange, onCloseFilter }: TableFilterProps) => {
 
-  const handleFilterValueChanged = (e: ChangeEvent<HTMLInputElement>, column: string, valueName: string): void => {
+  const handleFilterValueChanged = (e: ChangeEvent<HTMLInputElement>, column: string, value: string): void => {
     const checkbox = e.currentTarget
-
-    const valuesArray = filter[column] || []
-    assertAsArray(valuesArray)
-
-    if (checkbox.checked)
-      filter[column] = [ ...valuesArray, valueName ]
-    else
-      filter[column] = valuesArray.filter(name => name.toLowerCase() !== valueName.toLowerCase())
-
-    onFilterChange({ ...filter })
+    dispatchFilterChange({ type: 'TOGGLE_COLUMN', payload: { column, value, selected: checkbox.checked }})
   }
 
   const handleRangeValueChanged = (
     e: ChangeEvent<HTMLInputElement>,
     column: string,
     range: StructureRange,
-    rangeTarget: 'min' | 'max'): void =>
+    target: 'min' | 'max'): void =>
   {
-    const newValue = e.currentTarget.value
-    const type = range.type
-
-    const value = type === 'date'
-      ? newValue
-      : parseFloat(newValue)
-
-    const filterValue = filter[column] || {}
-    assertAsRange(filterValue)
-
-    const parser = range.parser ? { parser: range.parser } : {}
-
-    filter[column] = {
-      ...filterValue,
-      [rangeTarget]: value, ...parser
-    }
-
-    onFilterChange({ ...filter })
+    const input = e.currentTarget
+    dispatchFilterChange({ type: 'SET_COLUMN_RANGE', payload: { column, target, value: input.value, type: range.type }})
   }
 
   return (
@@ -59,24 +34,32 @@ const TableFilter = ({ filterStructure, filter={}, onFilterChange, onCloseFilter
                 { columnName }
               </div>
               { isRange(value)
-                  ? <>
-                      <label htmlFor={ `${columnName.toLowerCase()}-min` }>Min</label>
-                      <input
-                        id={`${columnName.toLowerCase()}-min`}
-                        name='min'
-                        type="text"
-                        aria-label={ `${columnName.toLowerCase()} min` }
-                        onChange= { e => handleRangeValueChanged(e, columnName, value, 'min') }
-                      />
-                      <label htmlFor={ `${columnName.toLowerCase()}-max` }>Max</label>
-                      <input
-                        id={`${columnName.toLowerCase()}-max`}
-                        name='max'
-                        aria-label={ `${columnName.toLowerCase()} max` }
-                        type="text"
-                        onChange= { e => handleRangeValueChanged(e, columnName, value, 'max') }
-                      />
-                    </>
+                  ? <div className={ styles.rangesContainer }>
+                      <div>
+                        <label htmlFor={ `${columnName.toLowerCase()}-min` }>Min</label>
+                        <input
+                          type="text"
+                          id={`${columnName.toLowerCase()}-min`}
+                          className={ styles.rangeInput }
+                          name='min'
+                          aria-label={ `${columnName.toLowerCase()} min` }
+                          value={ getRangeLimit(filterValues as FilterRange, 'min') }
+                          onChange= { e => handleRangeValueChanged(e, columnName, value, 'min') }
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor={ `${columnName.toLowerCase()}-max` }>Max</label>
+                        <input
+                          type="text"
+                          id={`${columnName.toLowerCase()}-max`}
+                          className={ styles.rangeInput }
+                          name='max'
+                          aria-label={ `${columnName.toLowerCase()} max` }
+                          value={ getRangeLimit(filterValues as FilterRange, 'max') }
+                          onChange= { e => handleRangeValueChanged(e, columnName, value, 'max') }
+                        />
+                      </div>
+                    </div>
                   : <div className={ styles.checkboxesContainer }>
                       { value.map((valueName) =>
                         <label key={ valueName } className={ styles.filterCheckbox }>
@@ -85,7 +68,7 @@ const TableFilter = ({ filterStructure, filter={}, onFilterChange, onCloseFilter
                             name={ valueName.toLowerCase() }
                             className={ styles.checkboxInput }
                             checked={ !!filterValues && isInValues(valueName, filterValues as string[]) }
-                            onChange={(e) => handleFilterValueChanged(e, columnName, valueName) }
+                            onChange={ e => handleFilterValueChanged(e, columnName, valueName) }
                           />
                           <span className={ styles.checkboxBox } aria-hidden="true"></span>
                           <span className={ styles.checkboxLabel }>
@@ -100,7 +83,7 @@ const TableFilter = ({ filterStructure, filter={}, onFilterChange, onCloseFilter
         : 'No data available'
       }
       <div className={ styles.buttonsContainer }>
-        <button className={ `${styles.button} ${styles.resetButton}` } onClick={ () => onFilterChange({}) }>
+        <button className={ `${styles.button} ${styles.resetButton}` } onClick={ () => dispatchFilterChange({ type: 'RESET_FILTER' })}>
           Reset
         </button>
         <button className={ `${styles.button} ${styles.closeButton}` } onClick={ onCloseFilter }>
@@ -111,17 +94,12 @@ const TableFilter = ({ filterStructure, filter={}, onFilterChange, onCloseFilter
   )
 }
 
+const getRangeLimit = (range: FilterRange, limit: 'min'|'max'): string => {
+  const rangeLimit = range && range[limit]
+  return rangeLimit ? String(rangeLimit) : ''
+}
+
 const isInValues = (value: string, values: string[]): boolean =>
   values.includes(value)
-
-function assertAsRange(value: string[] | FilterRange): asserts value is FilterRange {
-  if (Array.isArray(value))
-    throw new Error(`Expected value to be a 'filter range', but is a ${typeof value}`)
-}
-
-function assertAsArray (value: string[] | FilterRange): asserts value is string[] {
-  if (!Array.isArray(value))
-    throw new Error(`Expected value to be a string array, but is a ${typeof value}`)
-}
 
 export default TableFilter

@@ -1,10 +1,8 @@
-import {
-  TableFilter, DataTableProps, Entity
-} from './types/types.ts'
-
-import {useState} from 'react'
+import { DataTableProps, Entity } from './types/types.ts'
+import { useReducer, useState } from 'react'
 import TableToolbar from './TableToolbar.tsx'
 import Table from './Table.tsx'
+import filterReducer from './reducers/filterReducer.ts'
 
 const DataTable = <T extends Entity> (
 {
@@ -17,7 +15,7 @@ const DataTable = <T extends Entity> (
   noEntriesMessage,
 }: DataTableProps<T>) => {
 
-  const [filter, setFilter] = useState<TableFilter>({})
+  const [filter, dispatch] = useReducer(filterReducer, {})
   const [search, setSearch] = useState<string>('')
 
   return (
@@ -29,7 +27,7 @@ const DataTable = <T extends Entity> (
           showSearch={ showSearch }
           onSearchChange={ setSearch }
           filter={ filter }
-          onFilterChange={ setFilter }
+          dispatchFilterChange={ dispatch }
         />
       }
       <Table
@@ -46,34 +44,3 @@ const DataTable = <T extends Entity> (
 }
 
 export default DataTable
-
-// const buildTableFilter = (column: string, filter: TableFilter, value: FilterEventValue): TableFilter => {
-//
-//   if (isCheckboxEvent(value)) {
-//
-//     const valuesArray = filter[column] || []
-//
-//     assertValueAsArray(valuesArray)
-//
-//     if (value.checked)
-//       filter[column] = [ ...valuesArray, value.name ]
-//     else
-//       filter[column] = valuesArray.filter(name => name.toLowerCase() !== value.name.toLowerCase())
-//   }
-//   else {
-//     // is range event
-//
-//     const filterValue = filter[column]
-//     filter[column] = { ...(filterValue || {}), ...value }
-//   }
-//
-//   return filter
-// }
-
-// const isCheckboxEvent = (value: any): value is { name: string, checked: boolean } =>
-//   value.name && value.checked !== undefined
-//
-// function assertValueAsArray (value: string[] | FilterRange): asserts value is string[] {
-//   if (!Array.isArray(value))
-//     throw new Error(`Expected value to be a string array, but is a ${typeof value}`)
-// }

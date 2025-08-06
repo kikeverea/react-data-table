@@ -1,6 +1,6 @@
 import { TableToolbarProps } from './types/types.ts'
 import TableFilter from './TableFilter.tsx'
-import useFilterStructure from './hooks/useFilter.ts'
+import useFilterStructure from './hooks/useFilterStructure.ts'
 import {useState} from 'react'
 import styles from './css/TableToolbar.module.css'
 import SearchIcon from './resources/search.svg?react'
@@ -9,12 +9,12 @@ import FilterIcon from './resources/filter.svg?react'
 const TableToolbar = (
 {
   collection,
-  filter,
+  filter={},
   filterColumns,
   showSearch=true,
   searchPlaceholder,
   onSearchChange=() => {},
-  onFilterChange=() => {},
+  dispatchFilterChange=() => {},
 }: TableToolbarProps) => {
 
   const [showFilter, setShowFilter] = useState<boolean>(false)
@@ -44,7 +44,7 @@ const TableToolbar = (
               <TableFilter
                 filterStructure={ filterStructure }
                 filter={ filter }
-                onFilterChange={ onFilterChange }
+                dispatchFilterChange={ dispatchFilterChange }
                 onCloseFilter={ () => setShowFilter(false) }
               />
             </div>

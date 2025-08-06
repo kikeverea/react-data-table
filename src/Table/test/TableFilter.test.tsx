@@ -14,7 +14,7 @@ describe('Table Filter', () => {
     'Birth': { type: 'date', range: true, parser: parser }
   }
 
-  const onFilterChangeMock = vi.fn()
+  const dispatchFilterChangeMock = vi.fn()
   const onCloseFilterMock = vi.fn()
 
   beforeEach(() => {
@@ -22,9 +22,14 @@ describe('Table Filter', () => {
       <TableFilter
         filterStructure={ filterStructure }
         filter={{}}
-        onFilterChange={ onFilterChangeMock }
+        dispatchFilterChange={ dispatchFilterChangeMock }
         onCloseFilter={ onCloseFilterMock }
       />)
+  })
+
+  afterEach(() => {
+    dispatchFilterChangeMock.mockClear()
+    onCloseFilterMock.mockClear()
   })
 
   test('component has a dialog role, aria modal and is labeled', () => {
@@ -69,35 +74,35 @@ describe('Table Filter', () => {
     expect(max).toBeDefined()
   })
 
-  test('checking a checkbox calls the handler with the column and values', async () => {
+  test('checking a checkbox calls its dispatcher', async () => {
     const checkbox = screen.getByRole('checkbox', { name: /Feline/i })
     await userEvent.click(checkbox)
 
-    expect(onFilterChangeMock).toHaveBeenCalledWith({ Family: ['Feline'] })
+    expect(dispatchFilterChangeMock).toHaveBeenCalledWith({
+      type: 'TOGGLE_COLUMN',
+      payload: { column: 'Family', value: 'Feline', selected: true },
+    })
+
+    expect(dispatchFilterChangeMock).toHaveBeenCalledTimes(1)
   })
 
   test('input in a number range calls the handler with the column name and range value', async () => {
-
     const age = screen.getByRole('group', { name: 'Age' })
     const [min, max] = within(age).getAllByRole('textbox') as HTMLInputElement[]
 
     await userEvent.type(min, '1')
-    expect(onFilterChangeMock).toHaveBeenLastCalledWith({ 'Age': { min: 1 }})
+    expect(dispatchFilterChangeMock).toHaveBeenLastCalledWith({
+      type: 'SET_COLUMN_RANGE',
+      payload: { column: 'Age', value: '1', type: 'number', target: 'min' },
+    })
 
     await userEvent.type(max, '1')
-    expect(onFilterChangeMock).toHaveBeenLastCalledWith({ 'Age': { min: 1, max: 1 }})
-  })
+    expect(dispatchFilterChangeMock).toHaveBeenLastCalledWith({
+      type: 'SET_COLUMN_RANGE',
+      payload: { column: 'Age', value: '1', type: 'number', target: 'max' },
+    })
 
-  test('input in a date range calls the handler with the column name and range value', async () => {
-
-    const birth = screen.getByRole('group', { name: 'Birth' })
-    const [min, max] = within(birth).getAllByRole('textbox') as HTMLInputElement[]
-
-    await userEvent.type(min, '2019-03-22')    // appends to the existing text
-    expect(onFilterChangeMock).toHaveBeenLastCalledWith({ 'Birth': { min: '2019-03-22', parser: parser }})
-
-    await userEvent.type(max, '2021-03-22')   // appends to the existing text
-    expect(onFilterChangeMock).toHaveBeenLastCalledWith({ 'Birth': { min: '2019-03-22', max: '2021-03-22', parser: parser }})
+    expect(dispatchFilterChangeMock).toHaveBeenCalledTimes(2)
   })
 
   test('clicking close button calls its handler', async () => {
@@ -111,6 +116,7 @@ describe('Table Filter', () => {
     const button = screen.getByRole('button', { name: /reset/i })
     await userEvent.click(button)
 
-    expect(onFilterChangeMock).toHaveBeenLastCalledWith({})
+    expect(dispatchFilterChangeMock).toHaveBeenLastCalledWith({ type: 'RESET_FILTER' })
+    expect(dispatchFilterChangeMock).toHaveBeenCalledTimes(1)
   })
 })

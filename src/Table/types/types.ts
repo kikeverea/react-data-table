@@ -1,4 +1,4 @@
-import { ReactNode } from 'react'
+import { Dispatch, ReactNode } from 'react'
 
 export type Dictionary<T> = { [key: string]: T }
 export type Entity = { id: number | string }
@@ -42,7 +42,7 @@ export type TableToolbarProps = {
   filterColumns?: FilterColumns,
   onSearchChange?: (search: string) => void,
   filter?: TableFilter,
-  onFilterChange?: (filter: TableFilter) => void
+  dispatchFilterChange?: Dispatch<FilterAction>,
 }
 
 
@@ -68,13 +68,17 @@ export type FilterRange = {
 export type TableFilterProps = {
   filterStructure: FilterStructure,
   filter: TableFilter,
-  onFilterChange: (filter: TableFilter) => void,
+  dispatchFilterChange: Dispatch<FilterAction>,
   onCloseFilter: () => void
 }
 
-export type FilterEventValue =
-  { min?: number | string, max?: number | string, parser?: (...args: any[]) => any } |
-  { name: string, checked: boolean }
+export type ColumnTogglePayload = { column: string, value: string, selected: boolean }
+export type RangeValuePayload = { column: string, target: 'min' | 'max', type: 'number' | 'date', value: string | number }
+
+export type FilterAction =
+  | { type: 'TOGGLE_COLUMN', payload: ColumnTogglePayload }
+  | { type: 'SET_COLUMN_RANGE', payload: RangeValuePayload }
+  | { type: 'RESET_FILTER' }
 
 
 /************ DataTable ***************/
