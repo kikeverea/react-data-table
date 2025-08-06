@@ -1,4 +1,5 @@
 import {render, screen, within} from '@testing-library/react'
+import '@testing-library/jest-dom';
 import { TableColumn } from '../types/types.ts'
 import {getNameCellsContent, TestData, dataRows, getTestData, formatDate} from './testUtils.ts'
 import DataTable from '../DataTable.tsx'
@@ -29,20 +30,14 @@ describe('Data Table', () => {
       render(<DataTable collection={ [] } columns={ columns } />)
 
       const rows = dataRows()
-      const [emptyMessage] = getNameCellsContent(rows)
-
-      expect(rows.length).toBe(1)
-      expect(emptyMessage).toBe('No data available')
+      expect(getNameCellsContent(rows)).toEqual(['No data available'])
     })
 
     test('renders custom empty message', () => {
       render(<DataTable collection={ [] } columns={ columns } noEntriesMessage='No entries'/>)
 
       const rows = dataRows()
-      const [emptyMessage] = getNameCellsContent(rows)
-
-      expect(rows.length).toBe(1)
-      expect(emptyMessage).toBe('No entries')
+      expect(getNameCellsContent(rows)).toEqual(['No entries'])
     })
   })
 
@@ -68,18 +63,7 @@ describe('Data Table', () => {
         render(<DataTable collection={ collection } columns={ columns } sortBy={{ column: 'family' }} />)
 
         const rows = dataRows()
-        expect(rows.length).toBe(collection.length)
-
-        // Names in expected order
-        const [dog, redFox, cat, lion, goldFish, monkey, seaLion] = getNameCellsContent(rows)
-
-        expect(dog).toBe('Dog')
-        expect(redFox).toBe('Red Fox')
-        expect(cat).toBe('Cat')
-        expect(lion).toBe('Lion')
-        expect(goldFish).toBe('Gold Fish')
-        expect(monkey).toBe('Monkey')
-        expect(seaLion).toBe('Sea Lion')
+        expect(getNameCellsContent(rows)).toEqual(['Dog', 'Red Fox', 'Cat', 'Lion', 'Gold Fish', 'Monkey', 'Sea Lion'])
       })
     })
 
@@ -88,13 +72,7 @@ describe('Data Table', () => {
         render(<DataTable collection={ collection } columns={ columns } paginate={ 2 }/>)
 
         const rows = dataRows()
-        expect(rows.length).toBe(2)
-
-        // Names in expected order
-        const [cat, dog] = getNameCellsContent()
-
-        expect(cat).toBe('Cat')
-        expect(dog).toBe('Dog')
+        expect(getNameCellsContent(rows)).toEqual(['Cat', 'Dog'])
       })
     })
 
@@ -104,7 +82,7 @@ describe('Data Table', () => {
         render(<DataTable collection={collection} columns={columns} showSearch={true}/>)
 
         const searchBar = screen.getByRole('textbox')
-        expect(searchBar).toBeDefined()
+        expect(searchBar).toBeInTheDocument()
       })
 
       test('renders rows that pass the search', async () => {
@@ -115,11 +93,7 @@ describe('Data Table', () => {
         await userEvent.type(searchBox, 'Lion')
 
         const rows = dataRows()
-        const [lion, seaLion] = getNameCellsContent(rows)
-
-        expect(rows.length).toBe(2)
-        expect(lion).toBe('Lion')
-        expect(seaLion).toBe('Sea Lion')
+        expect(getNameCellsContent(rows)).toEqual(['Lion', 'Sea Lion'])
       })
     })
 
@@ -135,9 +109,9 @@ describe('Data Table', () => {
         const familyParam = screen.getByText('Family')
         const typeParam = screen.getByText('Type')
 
-        expect(filterElement).toBeDefined()
-        expect(familyParam).toBeDefined()
-        expect(typeParam).toBeDefined()
+        expect(filterElement).toBeInTheDocument()
+        expect(familyParam).toBeInTheDocument()
+        expect(typeParam).toBeInTheDocument()
       })
 
       test('renders rows that pass the filter', async () => {
@@ -152,28 +126,17 @@ describe('Data Table', () => {
         await userEvent.click(felineCheckbox)
 
         const felineRows = dataRows()
-        const [cat, lion] = getNameCellsContent(felineRows)
-
-        expect(felineRows.length).toBe(2)
-        expect(lion).toBe('Lion')
-        expect(cat).toBe('Cat')
+        expect(getNameCellsContent(felineRows)).toEqual(['Cat', 'Lion'])
 
         await userEvent.click(petCheckbox)
 
         const felinePetRows = dataRows()
-        const [petCat] = getNameCellsContent(felinePetRows)
-
-        expect(felinePetRows.length).toBe(1)
-        expect(petCat).toBe('Cat')
+        expect(getNameCellsContent(felinePetRows)).toEqual(['Cat'])
 
         await userEvent.click(petCheckbox)
 
         const felineRowsThen = dataRows()
-        const [catThen, lionThen] = getNameCellsContent(felineRows)
-
-        expect(felineRowsThen.length).toBe(2)
-        expect(lionThen).toBe('Lion')
-        expect(catThen).toBe('Cat')
+        expect(getNameCellsContent(felineRowsThen)).toEqual(['Cat', 'Lion'])
       })
 
       test('renders rows that pass the range filter', async () => {
@@ -186,24 +149,14 @@ describe('Data Table', () => {
         const maxRange = screen.getByLabelText('Max')
 
         await userEvent.type(minRange, '10')
+
         const minRows = dataRows()
-
-        // Names in expected order
-        const [cat, lion, seaLion] = getNameCellsContent(minRows)
-
-        expect(minRows.length).toBe(3)
-        expect(cat).toBe('Cat')
-        expect(lion).toBe('Lion')
-        expect(seaLion).toBe('Sea Lion')
+        expect(getNameCellsContent(minRows)).toEqual(['Cat', 'Lion', 'Sea Lion'])
 
         await userEvent.type(maxRange, '11')
+
         const maxRows = dataRows()
-
-        // Names in expected order
-        const [catMax] = getNameCellsContent(maxRows)
-
-        expect(maxRows.length).toBe(1)
-        expect(catMax).toBe('Cat')
+        expect(getNameCellsContent(maxRows)).toEqual(['Cat'])
       })
 
       test('renders all rows when filter is reset', async () => {

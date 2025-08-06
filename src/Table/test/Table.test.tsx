@@ -49,21 +49,13 @@ describe('Table', () => {
     test('renders empty message', () => {
       render(<Table collection={ [] } columns={ columns } />)
 
-      const rows = dataRows()
-      const [emptyMessage] = getNameCellsContent(rows)
-
-      expect(rows.length).toBe(1)
-      expect(emptyMessage).toBe('No data available')
+      expect(getNameCellsContent()).toEqual(['No data available'])
     })
 
     test('renders custom empty message', () => {
       render(<Table collection={ [] } columns={ columns } noEntriesMessage='No entries'/>)
 
-      const rows = dataRows()
-      const [emptyMessage] = getNameCellsContent(rows)
-
-      expect(rows.length).toBe(1)
-      expect(emptyMessage).toBe('No entries')
+      expect(getNameCellsContent()).toEqual(['No entries'])
     })
   })
 
@@ -86,21 +78,13 @@ describe('Table', () => {
       test('renders rows that pass the search', () => {
         render(<Table collection={ collection } columns={ columns } search='dog' />)
 
-        const rows = dataRows()
-        const [lion] = getNameCellsContent(rows)
-
-        expect(rows.length).toBe(1)
-        expect(lion).toBe('Dog')
+        expect(getNameCellsContent()).toEqual(['Dog'])
       })
 
       test('renders empty message if no row passes the search', () => {
         render(<Table collection={ collection } columns={ columns } search='no-rows' />)
 
-        const rows = dataRows()
-        const [emptyMessage] = getNameCellsContent(rows)
-
-        expect(rows.length).toBe(1)
-        expect(emptyMessage).toBe('No data available')
+        expect(getNameCellsContent()).toEqual(['No data available'])
       })
     })
 
@@ -113,61 +97,31 @@ describe('Table', () => {
           }}
         />)
 
-        const rows = dataRows()
-        const [lion, redFox] = getNameCellsContent(rows)
-
-        expect(rows.length).toBe(2)
-        expect(lion).toBe('Lion')
-        expect(redFox).toBe('Red Fox')
+        expect(getNameCellsContent()).toEqual(['Lion', 'Red Fox'])
       })
 
       test('renders rows that pass the filter and search', () => {
         render(<Table collection={ collection } columns={ columns } search='cat' filter={{ 'Family': ['feline'] }} />)
 
-        const rows = dataRows()
-        const [cat] = getNameCellsContent(rows)
-
-        expect(rows.length).toBe(1)
-        expect(cat).toBe('Cat')
+        expect(getNameCellsContent()).toEqual(['Cat'])
       })
 
       test('renders rows that pass the range filter', () => {
         render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 8, max: 15, type: 'number'} }} />)
 
-        const rows = dataRows()
-
-        // Names in expected order
-        const [cat, lion] = getNameCellsContent(rows)
-
-        expect(rows.length).toBe(2)
-        expect(cat).toBe('Cat')
-        expect(lion).toBe('Lion')
+        expect(getNameCellsContent()).toEqual(['Cat', 'Lion'])
       })
 
       test('renders rows that pass the range filter, edge cases', () => {
         render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 10, max: 13, type: 'number'} }} />)
 
-        const rows = dataRows()
-
-        // Names in expected order
-        const [cat, lion] = getNameCellsContent(rows)
-
-        expect(rows.length).toBe(2)
-        expect(cat).toBe('Cat')
-        expect(lion).toBe('Lion')
+        expect(getNameCellsContent()).toEqual(['Cat', 'Lion'])
       })
 
       test('renders rows that pass a min range filter', () => {
         render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 12, type: 'number'} }} />)
 
-        const rows = dataRows()
-
-        // Names in expected order
-        const [lion, seaLion] = getNameCellsContent(rows)
-
-        expect(rows.length).toBe(2)
-        expect(lion).toBe('Lion')
-        expect(seaLion).toBe('Sea Lion')
+        expect(getNameCellsContent()).toEqual(['Lion', 'Sea Lion'])
       })
 
       test.each([
@@ -179,34 +133,19 @@ describe('Table', () => {
       ('renders empty message if no row passes the filter', noPassFilter => {
         render(<Table collection={ collection } columns={ columns } filter={ noPassFilter as { [column: string]: any } } />)
 
-        const rows = dataRows()
-        const [emptyMessage] = getNameCellsContent(rows)
-
-        expect(rows.length).toBe(1)
-        expect(emptyMessage).toBe('No data available')
+        expect(getNameCellsContent()).toEqual(['No data available'])
       })
 
       test('renders empty message if no row passes the filter and search', () => {
         render(<Table collection={ collection } columns={ columns } search='dog' filter={{ 'Family': ['feline'] }} />)
 
-        const rows = dataRows()
-        const [emptyMessage] = getNameCellsContent(rows)
-
-        expect(rows.length).toBe(1)
-        expect(emptyMessage).toBe('No data available')
+        expect(getNameCellsContent()).toEqual(['No data available'])
       })
 
       test('renders rows that pass the max range filter', () => {
         render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { max: 12, type: 'number' } }} />)
 
-        const rows = dataRows()
-
-        // Names in expected order
-        const [cat, dog] = getNameCellsContent(rows)
-
-        expect(rows.length).toBe(2)
-        expect(cat).toBe('Cat')
-        expect(dog).toBe('Dog')
+        expect(getNameCellsContent()).toEqual(['Cat', 'Dog'])
       })
 
       test('renders rows that pass the date range filter', () => {
@@ -225,14 +164,7 @@ describe('Table', () => {
               }}}
           />)
 
-        const rows = dataRows()
-
-        // Names in expected order
-        const [cat, lion] = getNameCellsContent(rows)
-
-        expect(rows.length).toBe(2)
-        expect(cat).toBe('Cat')
-        expect(lion).toBe('Lion')
+        expect(getNameCellsContent()).toEqual(['Cat', 'Lion'])
       })
 
       test('renders rows that pass a range filter, filter and search', () => {
@@ -243,11 +175,7 @@ describe('Table', () => {
           search='Lion'
         />)
 
-        const rows = dataRows()
-        const [lion] = getNameCellsContent(rows)
-
-        expect(rows.length).toBe(1)
-        expect(lion).toBe('Lion')
+        expect(getNameCellsContent()).toEqual(['Lion'])
       })
     })
 
@@ -295,14 +223,7 @@ describe('Table', () => {
       test('paginates data', () => {
         render(<Table collection={ collection } columns={ columns } paginate={ 2 }/>)
 
-        const rows = dataRows()
-        expect(rows.length).toBe(2)
-
-        // Names in expected order
-        const [cat, dog] = getNameCellsContent()
-
-        expect(cat).toBe('Cat')
-        expect(dog).toBe('Dog')
+        expect(getNameCellsContent()).toEqual(['Cat', 'Dog'])
       })
 
       test('render the selected page data', async () => {
@@ -313,11 +234,7 @@ describe('Table', () => {
 
         await userEvent.click(pageNumbers[1])
 
-        // Names in expected order
-        const [lion, seaLion] = getNameCellsContent()
-
-        expect(lion).toBe('Lion')
-        expect(seaLion).toBe('Sea Lion')
+        expect(getNameCellsContent()).toEqual(['Lion', 'Sea Lion'])
       })
 
       test('if more than 6 pages, render navigation arrows', () => {
@@ -342,10 +259,8 @@ describe('Table', () => {
         const leftArrow = within(paginationNavigation).getByLabelText('Go to previous page')
         await userEvent.click(leftArrow)
 
-        const [cellName] = getNameCellsContent()
         const expectedPage = 3
-
-        expect(cellName).toBe(longCollection[expectedPage].name)
+        expect(getNameCellsContent()).toEqual([longCollection[expectedPage].name])
       })
 
       test('left arrow navigates to next page', async () => {
@@ -356,10 +271,8 @@ describe('Table', () => {
         const rightArrow = within(paginationNavigation).getByLabelText('Go to next page')
         await userEvent.click(rightArrow)
 
-        const [cellName] = getNameCellsContent()
         const expectedPage = 5
-
-        expect(cellName).toBe(longCollection[expectedPage].name)
+        expect(getNameCellsContent()).toEqual([longCollection[expectedPage].name])
       })
 
       test('has select for choosing items per page', () => {
@@ -388,79 +301,37 @@ describe('Table', () => {
       test('sorts rows ascending', () => {
         render(<Table collection={ collection } columns={ columns } sortBy={{ column: 'family' }} />)
 
-        const rows = dataRows()
-        expect(rows.length).toBe(collection.length)
-
-        // Names in expected order
-        const [dog, cat, lion, seaLion] = getNameCellsContent(rows)
-
-        expect(dog).toBe('Dog')
-        expect(cat).toBe('Cat')
-        expect(lion).toBe('Lion')
-        expect(seaLion).toBe('Sea Lion')
+        expect(getNameCellsContent()).toEqual(['Dog', 'Cat', 'Lion', 'Sea Lion'])
       })
 
       test('sorts rows descending', () => {
         render(<Table collection={ collection } columns={ columns } sortBy={{ column: 'family', direction: 'desc' }} />)
 
-        const rows = dataRows()
-        expect(rows.length).toBe(collection.length)
-
-        // Names in expected order
-        const [seaLion, cat, lion, dog] = getNameCellsContent(rows)
-
-        expect(cat).toBe('Cat')
-        expect(lion).toBe('Lion')
-        expect(dog).toBe('Dog')
-        expect(seaLion).toBe('Sea Lion')
+        expect(getNameCellsContent()).toEqual(['Sea Lion', 'Cat', 'Lion', 'Dog'])
       })
 
       test('sorts by number asc', () => {
         render(<Table collection={ collection } columns={ columns } sortBy={{ column: 'age' }} />)
 
-        // Names in expected order
-        const [dog, cat, lion, seaLion] = getNameCellsContent()
-
-        expect(dog).toBe('Dog')
-        expect(cat).toBe('Cat')
-        expect(lion).toBe('Lion')
-        expect(seaLion).toBe('Sea Lion')
+        expect(getNameCellsContent()).toEqual(['Dog', 'Cat', 'Lion', 'Sea Lion'])
       })
 
       test('sorts by number desc', () => {
         render(<Table collection={ collection } columns={ columns } sortBy={{ column: 'age', direction: 'desc' }} />)
 
-        // Names in expected order
-        const [seaLion, lion, cat, dog] = getNameCellsContent()
-
-        expect(seaLion).toBe('Sea Lion')
-        expect(lion).toBe('Lion')
-        expect(cat).toBe('Cat')
-        expect(dog).toBe('Dog')
+        expect(getNameCellsContent()).toEqual(['Sea Lion', 'Lion', 'Cat', 'Dog'])
       })
 
       test('sorts by date asc', () => {
         render(<Table collection={ collection } columns={ columns } sortBy={{ column: 'birth' }} />)
 
-        // Names in expected order
-        const [seaLion, lion, cat, dog] = getNameCellsContent()
-
-        expect(seaLion).toBe('Sea Lion')
-        expect(lion).toBe('Lion')
-        expect(cat).toBe('Cat')
-        expect(dog).toBe('Dog')
+        expect(getNameCellsContent()).toEqual(['Sea Lion', 'Lion', 'Cat', 'Dog'])
       })
 
       test('sorts by date desc', () => {
         render(<Table collection={ collection } columns={ columns } sortBy={{ column: 'birth', direction: 'desc' }} />)
 
-        // Names in expected order
-        const [dog, cat, lion, seaLion] = getNameCellsContent()
-
-        expect(dog).toBe('Dog')
-        expect(cat).toBe('Cat')
-        expect(lion).toBe('Lion')
-        expect(seaLion).toBe('Sea Lion')
+        expect(getNameCellsContent()).toEqual(['Dog', 'Cat', 'Lion', 'Sea Lion'])
       })
 
       test.each(['asc', 'desc'])
@@ -485,27 +356,13 @@ describe('Table', () => {
           sortBy={{ column: 'name', direction: 'desc' }}
         />)
 
-        const rows = dataRows()
-        expect(rows.length).toBe(2)
-
-        // Names in expected order
-        const [seaLion, lion] = getNameCellsContent(rows)
-
-        expect(lion).toBe('Lion')
-        expect(seaLion).toBe('Sea Lion')
+        expect(getNameCellsContent()).toEqual(['Sea Lion', 'Lion'])
       })
 
       test('sorts a filtered, paginated collection', () => {
         render(<Table collection={ collection } columns={ columns } sortBy={{ column: 'family' }} paginate={ 2 } />)
 
-        const rows = dataRows()
-        expect(rows.length).toBe(2)
-
-        // Names in expected order
-        const [dog, cat] = getNameCellsContent(rows)
-
-        expect(dog).toBe('Dog')
-        expect(cat).toBe('Cat')
+        expect(getNameCellsContent()).toEqual(['Dog', 'Cat'])
       })
 
       test('sorts the table by the clicked header', async () => {
@@ -514,13 +371,7 @@ describe('Table', () => {
         const nameHeader = screen.getAllByRole('columnheader')[0]
         await userEvent.click(nameHeader)
 
-        // Names in expected order
-        const [cat, dog, lion, seaLion] = getNameCellsContent()
-
-        expect(cat).toBe('Cat')
-        expect(dog).toBe('Dog')
-        expect(lion).toBe('Lion')
-        expect(seaLion).toBe('Sea Lion')
+        expect(getNameCellsContent()).toEqual(['Cat', 'Dog', 'Lion', 'Sea Lion'])
       })
 
       test('toggles sort direction when clicking the sorting header', async () => {
@@ -529,23 +380,13 @@ describe('Table', () => {
         const familyHeader = screen.getAllByRole('columnheader')[1]
         await userEvent.click(familyHeader)
 
-        // Names in expected order
-        const [seaLion, cat, lion, dog] = getNameCellsContent()
-
-        expect(cat).toBe('Cat')
-        expect(dog).toBe('Dog')
-        expect(lion).toBe('Lion')
-        expect(seaLion).toBe('Sea Lion')
+        expect(getNameCellsContent()).toEqual(['Sea Lion', 'Cat', 'Lion', 'Dog'])
       })
 
       test('sorts a paginated collection', () => {
         render( <Table collection={ longCollection } columns={ columns } sortBy={{ column: 'family' }} paginate={ 2 } />)
 
-        // Names in expected order
-        const [dog, cat] = getNameCellsContent()
-
-        expect(dog).toBe('Dog')
-        expect(cat).toBe('Cat')
+        expect(getNameCellsContent()).toEqual(['Dog', 'Cat'])
       })
     })
   })
