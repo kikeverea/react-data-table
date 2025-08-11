@@ -1,7 +1,7 @@
 import {render, screen, within} from '@testing-library/react'
 import '@testing-library/jest-dom';
 import { TableColumn } from '../types/types.ts'
-import {getNameCellsContent, TestData, dataRows, getTestData, formatDate} from './testUtils.ts'
+import {getNameCellsContent, TestData, dataRows, getTestData, formatDate, parseDate} from './testUtils.ts'
 import DataTable from '../DataTable.tsx'
 import userEvent from '@testing-library/user-event'
 
@@ -16,11 +16,11 @@ const collection: TestData[] = [
 ]
 
 const columns: TableColumn<TestData>[] = [
-  { name: 'Name', data: item => `${item.name}`},
-  { name: 'Family', data: item => `${item.family}`},
-  { name: 'Type', data: item => `${item.type}`},
-  { name: 'Age', data: item => `${item.age}`, type: 'number' },
-  { name: 'Birth', data: item => `${item.birth}`, format: formatDate, type: 'date' },
+  { name: 'Name', data: item => item.name},
+  { name: 'Family', data: item => item.family},
+  { name: 'Type', data: item => item.type},
+  { name: 'Age', data: item => item.age },
+  { name: 'Birth', data: item => parseDate(item.birth), presenter: formatDate },
 ]
 
 describe('Data Table', () => {
