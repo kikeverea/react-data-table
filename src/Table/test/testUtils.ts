@@ -9,35 +9,44 @@ export type TestData = {
   birth: string,
 }
 
-export const formatDate = (date: string): string => {
-  const [year, month, day] = date.split('-')
-  return `${day}-${month}-${year}`
+export const formatDate = (dateMillis: number): string => {
+  const date = new Date(dateMillis)
+  return `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
 }
 
-export const dataRows = () => {
-  return screen.getAllByRole('row').slice(1)    // rows excluding the header row
+export const parseDate = (date: string): number => {
+  return new Date(date).getTime()
+}
+
+export const parseLocalDate = (date: string): number => {
+  const [day, month, year] = date.split('-')
+  return parseDate(`${year}-${month}-${day}`)
 }
 
 export const getTestData = ({ collection, row, col }: { collection: TestData[], row: number, col: number }) => {
 
-  const dataRow = collection[row]
+  const data = collection[row]
 
   switch (col) {
     case 0 :
-      return String(dataRow.name)
+      return String(data.name)
 
     case 1 :
-      return String(dataRow.family)
+      return String(data.family)
 
     case 2 :
-      return String(dataRow.type)
+      return String(data.type)
 
     case 3 :
-      return String(dataRow.age)
+      return String(data.age)
 
     case 4 :
-      return String(formatDate(dataRow.birth))
+      return formatDate(parseDate(data.birth))
   }
+}
+
+export const dataRows = () => {
+  return screen.getAllByRole('row').slice(1)    // rows excluding the header row
 }
 
 export const getNameCellsContent = (rows: HTMLElement[]=dataRows()) => {

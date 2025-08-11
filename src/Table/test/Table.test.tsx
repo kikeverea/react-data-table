@@ -3,17 +3,23 @@ import userEvent from '@testing-library/user-event'
 import Table from '../Table.tsx'
 import { TableColumn } from '../types/types.ts'
 
-import { parse } from 'date-fns'
-import { formatDate, dataRows, getNameCellsContent, getTestData, TestData } from './testUtils.ts'
+import {
+  formatDate,
+  dataRows,
+  getNameCellsContent,
+  TestData,
+  parseDate,
+  getTestData
+} from './testUtils.ts'
 
 describe('Table', () => {
 
   const columns: TableColumn<TestData>[] = [
-    { name: 'Name', data: item => `${item.name}`},
-    { name: 'Family', data: item => `${item.family}`},
-    { name: 'Type', data: item => `${item.type}`},
-    { name: 'Age', data: item => `${item.age}`, type: 'number' },
-    { name: 'Birth', data: item => `${item.birth}`, format: formatDate, type: 'date' },
+    { name: 'Name', data: item => item.name },
+    { name: 'Family', data: item => item.family },
+    { name: 'Type', data: item => item.type },
+    { name: 'Age', data: item => item.age },
+    { name: 'Birth', data: item => parseDate(item.birth), presenter: formatDate }
   ]
 
   const collection: TestData[] = [
@@ -107,19 +113,19 @@ describe('Table', () => {
       })
 
       test('renders rows that pass the range filter', () => {
-        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 8, max: 15, type: 'number'} }} />)
+        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 8, max: 15 } }} />)
 
         expect(getNameCellsContent()).toEqual(['Cat', 'Lion'])
       })
 
       test('renders rows that pass the range filter, edge cases', () => {
-        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 10, max: 13, type: 'number'} }} />)
+        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 10, max: 13 } }} />)
 
         expect(getNameCellsContent()).toEqual(['Cat', 'Lion'])
       })
 
       test('renders rows that pass a min range filter', () => {
-        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 12, type: 'number'} }} />)
+        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 12 } }} />)
 
         expect(getNameCellsContent()).toEqual(['Lion', 'Sea Lion'])
       })
@@ -143,14 +149,12 @@ describe('Table', () => {
       })
 
       test('renders rows that pass the max range filter', () => {
-        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { max: 12, type: 'number' } }} />)
+        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { max: 12 } }} />)
 
         expect(getNameCellsContent()).toEqual(['Cat', 'Dog'])
       })
 
       test('renders rows that pass the date range filter', () => {
-        const dateFormat = 'yyyy-MM-dd'
-
         render(
           <Table
             collection={ collection }
@@ -159,8 +163,7 @@ describe('Table', () => {
               'Birth': {
                 min: '2012-07-14',
                 max: '2015-07-14',
-                type: 'date',
-                parser: date => parse(date, dateFormat, new Date()).getTime()
+                parser: parseDate
               }}}
           />)
 
@@ -171,7 +174,7 @@ describe('Table', () => {
         render(<Table
           collection={ collection }
           columns={ columns }
-          filter={{ 'Age': { min: 8, max: 16, type: 'number' }, 'Family': ['feline'] }}
+          filter={{ 'Age': { min: 8, max: 16 }, 'Family': ['feline'] }}
           search='Lion'
         />)
 
@@ -263,7 +266,7 @@ describe('Table', () => {
         expect(getNameCellsContent()).toEqual([longCollection[expectedPage].name])
       })
 
-      test('left arrow navigates to next page', async () => {
+      test('right arrow navigates to next page', async () => {
         render(<Table collection={ longCollection } columns={ columns } paginate={ 1 } page={ 4 } />)
 
         const paginationNavigation = screen.getByLabelText('Pagination Navigation')
@@ -288,9 +291,9 @@ describe('Table', () => {
         render(<Table collection={ longCollection } columns={ columns } paginate={ 2 } />)
 
         const paginationNavigation = screen.getByLabelText('Pagination Navigation')
-        const pageCountSelect = within(paginationNavigation).getByRole('combobox')
+        const itemsPerPageSelect = within(paginationNavigation).getByRole('combobox')
 
-        await userEvent.selectOptions(pageCountSelect, '10')
+        await userEvent.selectOptions(itemsPerPageSelect, '10')
 
         const rows = dataRows()
         expect(rows).toHaveLength(Math.min(longCollection.length, 10))
@@ -351,7 +354,7 @@ describe('Table', () => {
         render(<Table
           collection={ collection }
           columns={ columns }
-          filter={{ 'Age': { min: 8, max: 16, type: 'number' } }}
+          filter={{ 'Age': { min: 8, max: 16 } }}
           search='Lion'
           sortBy={{ column: 'name', direction: 'desc' }}
         />)

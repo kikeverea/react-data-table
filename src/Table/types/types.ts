@@ -3,13 +3,14 @@ import { Dispatch, ReactNode } from 'react'
 export type Dictionary<T> = { [key: string]: T }
 export type Entity = { id: number | string }
 
+export type Primitive = string | number
+
 /************ Table ***************/
 
 export type TableColumn<T extends Entity> = {
   name: string,
-  data: (item: T) => ReactNode,
-  format?: (value: string) => string,
-  type?: 'text' | 'number' | 'date'
+  data: (item: T) => Primitive | Primitive[],
+  presenter?: (value: any) => ReactNode,
 }
 
 export type TableProps<T extends Entity> = {
@@ -30,7 +31,7 @@ export type TableSort = { column: string, direction?: 'asc' | 'desc' }
 
 /************ Toolbar ***************/
 
-export type RangeFilter = [string, 'range', ('number' | 'date'), ((value: string) => number)?]
+export type RangeFilter = [string, 'range', ('number' | 'date'), ((value: any) => number)?]
 
 export type FilterColumns = (string | RangeFilter)[]
 
@@ -48,9 +49,9 @@ export type TableToolbarProps = {
 
 /************ Filter ***************/
 
-export type FilterStructure = Dictionary<string[] | StructureRange>
+export type FilterStructure = Dictionary<string[] | RangeStructure>
 
-export type StructureRange = {
+export type RangeStructure = {
   range: true
   type: 'number' | 'date',
   parser?: (value: string) => number
@@ -61,8 +62,7 @@ export type TableFilter = Dictionary<string[] | FilterRange>
 export type FilterRange = {
   min?: number | string,
   max?: number | string,
-  type: 'number' | 'date',
-  parser?: (value: string) => number
+  parser?: (value: any) => number
 }
 
 export type TableFilterProps = {
@@ -73,7 +73,12 @@ export type TableFilterProps = {
 }
 
 export type ColumnTogglePayload = { column: string, value: string, selected: boolean }
-export type RangeValuePayload = { column: string, target: 'min' | 'max', type: 'number' | 'date', value: string | number }
+export type RangeValuePayload = {
+  column: string,
+  target: 'min' | 'max',
+  range: RangeStructure,
+  value: string | number
+}
 
 export type FilterAction =
   | { type: 'TOGGLE_COLUMN', payload: ColumnTogglePayload }
@@ -93,3 +98,9 @@ export type DataTableProps<T extends Entity> = {
   filter?: FilterColumns,
   page?: number,
 }
+
+/************ Guards ***************/
+
+export const isString = (value: unknown): value is string => typeof value === 'string'
+export const isNumber = (value: unknown): value is number => typeof value === 'number'
+export const isBoolean = (value: unknown): value is boolean => typeof value === 'boolean'
