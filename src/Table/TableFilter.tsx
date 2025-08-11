@@ -1,8 +1,8 @@
-import {FilterRange, StructureRange, TableFilterProps} from './types/types.ts'
+import {FilterRange, RangeStructure, TableFilterProps} from './types/types.ts'
 import {ChangeEvent} from 'react'
 import styles from './css/TableFilter.module.css'
 
-const isRange = (value: any): value is StructureRange => value.range
+const isRange = (value: any): value is RangeStructure => value.range
 
 const TableFilter = ({ filterStructure, filter={}, dispatchFilterChange, onCloseFilter }: TableFilterProps) => {
 
@@ -14,11 +14,15 @@ const TableFilter = ({ filterStructure, filter={}, dispatchFilterChange, onClose
   const handleRangeValueChanged = (
     e: ChangeEvent<HTMLInputElement>,
     column: string,
-    range: StructureRange,
+    range: FilterRange,
     target: 'min' | 'max'): void =>
   {
+
     const input = e.currentTarget
-    dispatchFilterChange({ type: 'SET_COLUMN_RANGE', payload: { column, target, value: input.value, type: range.type }})
+    dispatchFilterChange({
+      type: 'SET_COLUMN_RANGE',
+      payload: { column, target, value: input.value, parser: range.parser }
+    })
   }
 
   return (

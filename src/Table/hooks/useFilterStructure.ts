@@ -1,5 +1,5 @@
 import {useMemo, useRef, useState} from 'react'
-import {Dictionary, FilterColumns, FilterStructure, RangeFilter, StructureRange} from '../types/types.ts'
+import {Dictionary, FilterColumns, FilterStructure, RangeFilter, RangeStructure} from '../types/types.ts'
 
 type VersionedStructure = readonly [FilterStructure | {}, number]
 
@@ -48,10 +48,10 @@ export const buildFilterStructure =
   }, {})
 }
 
-const extractRangeFilter = (column: RangeFilter): StructureRange => {
-  const [_columnName, _range, type] = column
+const extractRangeFilter = (column: RangeFilter): RangeStructure => {
+  const [ _columnName, _range, type, parser ] = column
 
-  return { type: type, range: true }
+  return { type: type, range: true, parser }
 }
 
 const extractCheckboxesFilter = (column: string, collection: Dictionary<string|number>[]): string[] => {

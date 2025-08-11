@@ -76,8 +76,8 @@ export type ColumnTogglePayload = { column: string, value: string, selected: boo
 export type RangeValuePayload = {
   column: string,
   target: 'min' | 'max',
-  range: RangeStructure,
-  value: string | number
+  value: string | number,
+  parser?: (value: any) => number
 }
 
 export type FilterAction =

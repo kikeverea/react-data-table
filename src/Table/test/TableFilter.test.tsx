@@ -93,13 +93,13 @@ describe('Table Filter', () => {
     await userEvent.type(min, '1')
     expect(dispatchFilterChangeMock).toHaveBeenLastCalledWith({
       type: 'SET_COLUMN_RANGE',
-      payload: { column: 'Age', value: '1', type: 'number', target: 'min' },
+      payload: { column: 'Age', value: '1', target: 'min', parser: undefined },
     })
 
     await userEvent.type(max, '1')
     expect(dispatchFilterChangeMock).toHaveBeenLastCalledWith({
       type: 'SET_COLUMN_RANGE',
-      payload: { column: 'Age', value: '1', type: 'number', target: 'max' },
+      payload: { column: 'Age', value: '1', target: 'max', parser: undefined },
     })
 
     expect(dispatchFilterChangeMock).toHaveBeenCalledTimes(2)
