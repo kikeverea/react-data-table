@@ -1,7 +1,8 @@
 import {isValidElement, ReactNode, useState} from 'react'
-import {Entity, TableProps, TableSort} from './types.ts'
+import { Entity, TableProps } from './types.ts'
 import { processData } from './dataProcessor.ts'
 import styles from './Table.module.css'
+import useSort from './useSort.ts'
 
 const Table = <T extends Entity>(
 {
@@ -15,23 +16,12 @@ const Table = <T extends Entity>(
   noEntriesMessage,
 }: TableProps<T>) => {
 
-  const [sort, setSort] = useState<TableSort | undefined>(sortBy)
+  const [sort, setSortColumn] = useSort(sortBy)
   const [pagination, setPagination] = useState(itemsPerPage)
   const [page, setPage] = useState(currentPage || 0)
 
   const handleSortChange = (headerName: string): void => {
-    if (!sort)
-      return setSort({ column: headerName })
-
-    const toggleSortDirection = (direction?: string): 'asc' | 'desc' => direction === 'asc' ? 'desc' : 'asc'
-
-    const isSameColumn = sort.column.toLowerCase() === headerName.toLowerCase()
-
-    const direction = isSameColumn
-      ? toggleSortDirection(sort.direction || 'asc')
-      : 'asc'
-
-    setSort({ column: headerName, direction: direction })
+    setSortColumn(headerName)
   }
 
   const pages = pagination
