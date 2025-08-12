@@ -1,4 +1,4 @@
-import {ColumnTogglePayload, FilterAction, FilterRange, RangeValuePayload, TableFilter} from '../types/types.ts'
+import { ColumnTogglePayload, FilterAction, FilterRange, RangeValuePayload, TableFilter } from './types.ts'
 
 
 const filterReducer = (filter: TableFilter, action: FilterAction) : TableFilter  => {

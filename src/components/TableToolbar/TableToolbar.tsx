@@ -1,10 +1,10 @@
-import { TableToolbarProps } from './types/types.ts'
-import TableFilter from './TableFilter.tsx'
-import useFilterStructure from './hooks/useFilterStructure.ts'
+import TableFilter from '../TableFilter/TableFilter.tsx'
+import useFilterStructure from './useFilterStructure.ts'
 import {useState} from 'react'
-import styles from './css/TableToolbar.module.css'
-import SearchIcon from './resources/search.svg?react'
-import FilterIcon from './resources/filter.svg?react'
+import styles from './TableToolbar.module.css'
+import SearchIcon from '../../assets/icons/search.svg?react'
+import FilterIcon from '../../assets/icons/filter.svg?react'
+import {TableToolbarProps} from './types.ts'
 
 const TableToolbar = (
 {

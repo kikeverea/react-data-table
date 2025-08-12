@@ -1,6 +1,6 @@
 import {render, screen, within} from '@testing-library/react'
-import TableToolbar from '../TableToolbar.tsx'
-import { TestData } from './testUtils.ts'
+import TableToolbar from './TableToolbar.tsx'
+import { TestData } from '../testUtils.ts'
 import userEvent from '@testing-library/user-event'
 
 describe('Table Toolbar', () => {

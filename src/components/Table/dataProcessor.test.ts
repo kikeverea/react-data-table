@@ -1,6 +1,7 @@
-import { formatDate, parseDate, TestData } from '../test/testUtils.ts'
+import { formatDate, parseDate, TestData } from '../testUtils.ts'
 import { processData } from './dataProcessor.ts'
-import { TableColumn, TableFilter, TableSort } from '../types/types.ts'
+import { TableColumn, TableSort } from './types.ts'
+import {TableFilter} from '../TableFilter/types.ts'
 
 const collection: TestData[] = [
   { id: 1, name: 'Cat', family: 'Feline', type: 'Pet', age: 10, birth: '2015-07-14' },

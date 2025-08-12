@@ -1,13 +1,5 @@
-import {
-  Entity,
-  FilterRange,
-  isBoolean,
-  isNumber,
-  isString, Primitive,
-  TableColumn,
-  TableFilter,
-  TableSort
-} from '../types/types.ts'
+import {Entity, Primitive, TableColumn, TableSort} from './types.ts'
+import { FilterRange, TableFilter } from '../TableFilter/types.ts'
 
 export type ProcessData = {
   search?: string

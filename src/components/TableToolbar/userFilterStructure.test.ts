@@ -1,6 +1,6 @@
-import {FilterColumns, FilterStructure} from '../types/types.ts'
+import {FilterColumns, FilterStructure} from '../Table/types.ts'
 import { buildFilterStructure } from './useFilterStructure.ts'
-import {TestData} from '../test/testUtils.ts'
+import {TestData} from '../Table/test/testUtils.ts'
 
 
 const columns: FilterColumns = [ 'family', 'type', ['age', 'range', 'number'], ['birth', 'range', 'date'] ]

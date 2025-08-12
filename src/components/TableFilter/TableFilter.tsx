@@ -1,6 +1,6 @@
-import {FilterRange, RangeStructure, TableFilterProps} from './types/types.ts'
-import {ChangeEvent} from 'react'
-import styles from './css/TableFilter.module.css'
+import { ChangeEvent } from 'react'
+import styles from './TableFilter.module.css'
+import { FilterRange, RangeStructure, TableFilterProps } from './types.ts'
 
 const isRange = (value: any): value is RangeStructure => value.range
 

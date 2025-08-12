@@ -1,8 +1,19 @@
-import { DataTableProps, Entity } from './types/types.ts'
+import {Entity, TableColumn, TableSort} from '../Table/types.ts'
 import { useReducer, useState } from 'react'
-import TableToolbar from './TableToolbar.tsx'
-import Table from './Table.tsx'
-import filterReducer from './reducers/filterReducer.ts'
+import TableToolbar from '../TableToolbar/TableToolbar.tsx'
+import Table from '../Table/Table.tsx'
+import filterReducer from '../TableFilter/filterReducer.ts'
+import {FilterColumns} from '../TableToolbar/types.ts'
+
+export type DataTableProps<T extends Entity> = {
+  collection?: T[]
+  columns: TableColumn<T>[],
+  sortBy?: TableSort,
+  noEntriesMessage?: string,
+  paginate?: number,
+  showSearch?: boolean,
+  filter?: FilterColumns
+}
 
 const DataTable = <T extends Entity> (
 {

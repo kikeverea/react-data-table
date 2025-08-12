@@ -18,11 +18,6 @@ export const parseDate = (date: string): number => {
   return new Date(date).getTime()
 }
 
-export const parseLocalDate = (date: string): number => {
-  const [day, month, year] = date.split('-')
-  return parseDate(`${year}-${month}-${day}`)
-}
-
 export const getTestData = ({ collection, row, col }: { collection: TestData[], row: number, col: number }) => {
 
   const data = collection[row]

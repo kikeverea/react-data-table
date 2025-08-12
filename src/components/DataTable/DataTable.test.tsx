@@ -1,8 +1,8 @@
 import {render, screen, within} from '@testing-library/react'
 import '@testing-library/jest-dom';
-import { TableColumn } from '../types/types.ts'
-import {getNameCellsContent, TestData, dataRows, getTestData, formatDate, parseDate} from './testUtils.ts'
-import DataTable from '../DataTable.tsx'
+import { TableColumn } from '../Table/types.ts'
+import {getNameCellsContent, TestData, dataRows, getTestData, formatDate, parseDate} from '../testUtils.ts'
+import DataTable from './DataTable.tsx'
 import userEvent from '@testing-library/user-event'
 
 const collection: TestData[] = [

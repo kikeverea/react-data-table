@@ -1,7 +1,7 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import Table from '../Table.tsx'
-import { TableColumn } from '../types/types.ts'
+import Table from './Table.tsx'
+import { TableColumn } from './types.ts'
 
 import {
   formatDate,
@@ -10,7 +10,7 @@ import {
   TestData,
   parseDate,
   getTestData
-} from './testUtils.ts'
+} from '../testUtils.ts'
 
 describe('Table', () => {
 

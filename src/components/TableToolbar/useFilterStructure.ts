@@ -1,5 +1,7 @@
 import {useMemo, useRef, useState} from 'react'
-import {Dictionary, FilterColumns, FilterStructure, RangeFilter, RangeStructure} from '../types/types.ts'
+import {FilterStructure, RangeStructure} from '../TableFilter/types'
+import {FilterColumns, RangeFilter} from './types.ts'
+import {Dictionary} from '../types.ts'
 
 type VersionedStructure = readonly [FilterStructure | {}, number]
 

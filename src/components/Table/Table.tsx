@@ -1,7 +1,7 @@
 import {isValidElement, ReactNode, useState} from 'react'
-import {Entity, TableProps, TableSort} from './types/types.ts'
-import { processData } from './util/dataProcessor.ts'
-import styles from './css/Table.module.css'
+import {Entity, TableProps, TableSort} from './types.ts'
+import { processData } from './dataProcessor.ts'
+import styles from './Table.module.css'
 
 const Table = <T extends Entity>(
 {

@@ -28,7 +28,7 @@
   display: inline-block;
   width: 16px;
   height: 16px;
-  background-image: url('../resources/chevron-up.svg');
+  background-image: url('../../assets/icons/chevron-up.svg');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: bottom;
@@ -41,7 +41,7 @@
   display: inline-block;
   width: 16px;
   height: 16px;
-  background-image: url('../resources/chevron-down.svg');
+  background-image: url('../../assets/icons/chevron-down.svg');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
