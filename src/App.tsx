@@ -14,22 +14,12 @@ type Animal = {
 
 function App() {
 
-  const formatDate = (date: string): string => {
-    const [year, month, day] = date.split('-')
-    return `${day}-${month}-${year}`
-  }
-
-  const parseDate = (date: string): number => {
-    const [day, month, year] = date.split('-')
-    return Date.parse(`${day}-${month}-${year}`)
-  }
-
   const columns: TableColumn<Animal>[] = [
     { name: 'Name', data: item => item.name},
     { name: 'Family', data: item => item.family},
     { name: 'Type', data: item => item.type},
-    { name: 'Age', data: item => item.age, type: 'number'},
-    { name: 'Birth', data: item => item.birth, format: formatDate, type: 'date'},
+    { name: 'Age', data: item => item.age },
+    { name: 'Birth', data: item => parseDate(item.birth), presenter: formatDate },
   ]
 
   const collection: Animal[] = [
@@ -49,7 +39,7 @@ function App() {
           collection={ collection }
           columns={ columns }
           sortBy={{ column: 'family' }}
-          filter={['Family', 'Type', ['Age', 'range', 'number'], ['Birth', 'range', 'date', parseDate ]]}
+          filter={['Family', 'Type', ['Age', 'range'], ['Birth', 'range', parseUserInputDate ]]}
         />
       </div>
     </>

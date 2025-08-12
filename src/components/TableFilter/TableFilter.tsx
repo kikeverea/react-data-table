@@ -14,11 +14,12 @@ const TableFilter = ({ filterStructure, filter={}, dispatchFilterChange, onClose
   const handleRangeValueChanged = (
     e: ChangeEvent<HTMLInputElement>,
     column: string,
-    range: FilterRange,
+    range: RangeStructure,
     target: 'min' | 'max'): void =>
   {
 
     const input = e.currentTarget
+
     dispatchFilterChange({
       type: 'SET_COLUMN_RANGE',
       payload: { column, target, value: input.value, parser: range.parser }

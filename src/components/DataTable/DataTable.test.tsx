@@ -115,7 +115,7 @@ describe('Data Table', () => {
       })
 
       test('renders rows that pass the filter', async () => {
-        render(<DataTable collection={ collection } columns={ columns } filter={['Family', 'Type', ['Age', 'range', 'number']]} />)
+        render(<DataTable collection={ collection } columns={ columns } filter={['Family', 'Type', ['Age', 'range']]} />)
 
         const showFilterButton = screen.getByLabelText('show filter')
         await userEvent.click(showFilterButton)
@@ -140,7 +140,7 @@ describe('Data Table', () => {
       })
 
       test('renders rows that pass the range filter', async () => {
-        render(<DataTable collection={ collection } columns={ columns } filter={['Family', 'Type', ['Age', 'range', 'number']]} />)
+        render(<DataTable collection={ collection } columns={ columns } filter={['Family', 'Type', ['Age', 'range']]} />)
 
         const showFilterButton = screen.getByLabelText('show filter')
         await userEvent.click(showFilterButton)

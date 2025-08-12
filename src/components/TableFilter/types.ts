@@ -14,8 +14,7 @@ export type FilterStructure = Dictionary<string[] | RangeStructure>
 
 export type RangeStructure = {
   range: true
-  type: 'number' | 'date',
-  parser?: (value: string) => number
+  parser?: FilterParser
 }
 
 export type TableFilter = Dictionary<string[] | FilterRange>
@@ -23,7 +22,7 @@ export type TableFilter = Dictionary<string[] | FilterRange>
 export type FilterRange = {
   min?: number | string,
   max?: number | string,
-  parser?: (value: any) => number
+  parser?: FilterParser
 }
 
 export type ColumnTogglePayload = { column: string, value: string, selected: boolean }
@@ -32,7 +31,7 @@ export type RangeValuePayload = {
   column: string,
   target: 'min' | 'max',
   value: string | number,
-  parser?: (value: any) => number
+  parser?: FilterParser
 }
 
 export type FilterAction =

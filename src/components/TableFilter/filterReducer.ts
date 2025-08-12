@@ -36,14 +36,10 @@ const toggleColumn = (filter: TableFilter, payload: ColumnTogglePayload): TableF
 const setRangeLimit = (filter: TableFilter, payload: RangeValuePayload): TableFilter => {
   const { column, target, parser, value } = payload
 
-  const limitValue = typeof value === 'number'
-    ? value
-    : parser ? parser(value as string) : parseFloat(value)
-
   const rangeValue = filter[column] || {}
   assertAsRange(rangeValue)
 
-  return { ...filter, [column]: { ...rangeValue, [target]: limitValue }}
+  return { ...filter, [column]: { ...rangeValue, [target]: value, parser }}
 }
 
 function assertAsArray (value: string[] | FilterRange): asserts value is string[] {

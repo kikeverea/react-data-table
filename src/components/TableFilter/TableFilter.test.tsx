@@ -10,8 +10,8 @@ describe('Table Filter', () => {
   const filterStructure: FilterStructure = {
     'Family': ['Feline', 'Canine', 'Seals', 'Fish', 'Primate'],
     'Type': ['Pet', 'Wild',],
-    'Age': { type: 'number', range: true },
-    'Birth': { type: 'date', range: true, parser: parser }
+    'Age': { range: true },
+    'Birth': { range: true, parser: parser }
   }
 
   const dispatchFilterChangeMock = vi.fn()

@@ -40,28 +40,28 @@ describe('filterReducer', () => {
     test.each([10, '10'])('sets a range min', min => {
       const state = filterReducer(
         {},
-        { type: 'SET_COLUMN_RANGE', payload: { column: 'Age', type: 'number', target: 'min', value: min }}
+        { type: 'SET_COLUMN_RANGE', payload: { column: 'Age', target: 'min', value: min }}
       )
-      expect(state).toEqual({ Age: { min: 10 }})
+      expect(state).toEqual({ Age: { min: min }})
     })
 
     test.each([12, '12'])('sets a range max', max => {
       const state = filterReducer(
         {},
-        { type: 'SET_COLUMN_RANGE', payload: { column: 'Age', type: 'number', target: 'max', value: max }}
+        { type: 'SET_COLUMN_RANGE', payload: { column: 'Age', target: 'max', value: max }}
       )
-      expect(state).toEqual({ Age: { max: 12 }})
+      expect(state).toEqual({ Age: { max: max, parser: undefined }})
     })
 
     test('sets a range min and max', () => {
       const minState = filterReducer(
         {},
-        { type: 'SET_COLUMN_RANGE', payload: { column: 'Age', type: 'number', target: 'min', value: 10 }}
+        { type: 'SET_COLUMN_RANGE', payload: { column: 'Age', target: 'min', value: 10 }}
       )
 
       const minMaxState = filterReducer(
         minState,
-        { type: 'SET_COLUMN_RANGE', payload: { column: 'Age', type: 'number', target: 'max', value: 16 }}
+        { type: 'SET_COLUMN_RANGE', payload: { column: 'Age', target: 'max', value: 16 }}
       )
 
       expect(minMaxState).toEqual({ Age: { min: 10, max: 16 }})
@@ -70,7 +70,7 @@ describe('filterReducer', () => {
 
   test('reset filter', () => {
     const state = filterReducer(
-      { Family: ['Feline', 'Canine'], Age: { min: '10', max: '12', type: 'number' } },
+      { Family: ['Feline', 'Canine'], Age: { min: '10', max: '12' } },
       { type: 'RESET_FILTER' }
     )
     expect(state).toEqual({})

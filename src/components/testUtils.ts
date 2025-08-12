@@ -18,6 +18,21 @@ export const parseDate = (date: string): number => {
   return new Date(date).getTime()
 }
 
+export const parseUserInputDate = (date: string): number | null => {
+  if (!date)
+    return null
+
+  const [day, month, year] = date.split('-')
+
+  const validDate =
+    year && month && day &&
+    year.length === 4 &&
+    month.length >= 1 &&
+    day.length >= 1
+
+  return validDate ? parseDate(`${year}-${month}-${day}`) : null
+}
+
 export const getTestData = ({ collection, row, col }: { collection: TestData[], row: number, col: number }) => {
 
   const data = collection[row]

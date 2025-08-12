@@ -51,9 +51,9 @@ export const buildFilterStructure =
 }
 
 const extractRangeFilter = (column: RangeFilter): RangeStructure => {
-  const [ _columnName, _range, type, parser ] = column
+  const [ _columnName, _range, parser ] = column
 
-  return { type: type, range: true, parser }
+  return { range: true, parser }
 }
 
 const extractCheckboxesFilter = (column: string, collection: Dictionary<string|number>[]): string[] => {

@@ -1,8 +1,8 @@
-import {FilterAction, TableFilter} from '../TableFilter/types.ts'
+import {FilterAction, FilterParser, TableFilter} from '../TableFilter/types.ts'
 import {Dispatch} from 'react'
 import {Dictionary} from '../types.ts'
 
-export type RangeFilter = [string, 'range', ('number' | 'date'), ((value: any) => number)?]
+export type RangeFilter = [string, 'range', FilterParser?]
 
 export type FilterColumns = (string | RangeFilter)[]
 

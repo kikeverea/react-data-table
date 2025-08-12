@@ -74,19 +74,27 @@ const evaluateFilterWithValue = (filter: TableFilter | undefined, columnName: st
     : evaluateCompoundFilter(columnFilter, value)
 }
 
-const evaluateRangeFilter = (filter: FilterRange, value: Primitive): boolean => {
+const evaluateRangeFilter = (filter: FilterRange, primitiveValue: Primitive): boolean => {
+  const value = asNumber(primitiveValue)
+
+  if (!value)
+    return true
+
   const parser = filter.parser
 
-  const min = parser ? parser(filter.min) : filter.min
-  const max = parser ? parser(filter.max) : filter.max
+  const min = parser ? parser(filter.min) : asNumber(filter.min)
+  const max = parser ? parser(filter.max) : asNumber(filter.max)
 
-  if (min !== undefined && max !== undefined)
+  const hasMin = numberPresent(min)
+  const hasMax = numberPresent(max)
+
+  if (hasMin && hasMax)
     return value >= min && value <= max
 
-  else if (min !== undefined)
+  else if (hasMin)
     return value >= min
 
-  else if (max !== undefined)
+  else if (hasMax)
     return value <= max
 
   else return true
@@ -149,3 +157,21 @@ export const pageRange = (currentPage: number, itemsPerPage: number | undefined,
 
   return [startIndex, endIndex]
 }
+
+const isString = (value: unknown): value is string => typeof value === 'string'
+const isNumber = (value: unknown): value is number => typeof value === 'number'
+const isBoolean = (value: unknown): value is boolean => typeof value === 'boolean'
+const asNumber = (value: string | number | undefined): number | null => {
+  if (!value)
+    return null
+
+  if (isBoolean(value))
+    return value ? 1 : 0
+
+  if (isString(value))
+    return parseFloat(value)
+
+  return value
+}
+const numberPresent = (value: number | null): value is number =>
+  value !== undefined && value !== null && String(value).trim() !== ''
