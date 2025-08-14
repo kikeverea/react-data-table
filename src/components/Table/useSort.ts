@@ -8,15 +8,15 @@ const useSort = (initialSort: TableSort | undefined): SortState => {
   const [sort, setSort] = useState<TableSort | undefined>(initialSort)
 
   const handleSortChange = (headerName: string): void => {
-    if (!sort)
-      return setSort({ column: headerName })
-
-    const toggleSortDirection = (direction?: string): 'asc' | 'desc' => direction === 'asc' ? 'desc' : 'asc'
+    if (!sort) {
+      setSort({ column: headerName })
+      return
+    }
 
     const isSameColumn = sort.column.toLowerCase() === headerName.toLowerCase()
 
     const direction = isSameColumn
-      ? toggleSortDirection(sort.direction || 'asc')
+      ? (sort.direction || 'asc') === 'asc' ? 'desc' : 'asc'
       : 'asc'
 
     setSort({ column: headerName, direction: direction })

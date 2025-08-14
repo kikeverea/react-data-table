@@ -1,8 +1,10 @@
-import {isValidElement, ReactNode, useState} from 'react'
+import {isValidElement, ReactNode} from 'react'
 import { Entity, TableProps } from './types.ts'
 import { processData } from './dataProcessor.ts'
 import styles from './Table.module.css'
 import useSort from './useSort.ts'
+import usePagination from './usePagination.ts'
+import TablePaginator from '../TablePaginator/TablePaginator.tsx'
 
 const Table = <T extends Entity>(
 {
@@ -11,28 +13,22 @@ const Table = <T extends Entity>(
   search,
   filter,
   sortBy,
-  paginate: itemsPerPage,
+  paginate,
   page: currentPage,
   noEntriesMessage,
 }: TableProps<T>) => {
 
   const [sort, setSortColumn] = useSort(sortBy)
-  const [pagination, setPagination] = useState(itemsPerPage)
-  const [page, setPage] = useState(currentPage || 0)
+  const [pagination, setItemsPerPage, setPage] = usePagination(paginate, currentPage || 0)
 
-  const handleSortChange = (headerName: string): void => {
-    setSortColumn(headerName)
-  }
-
-  const pages = pagination
-    ? Math.ceil((collection?.length || 0) / pagination)
-    : 1
+  // TODO: memoize mapped data (call on column.data)
+  // TODO: memoize filtered and searched data, then sort and paginate that data (maybe push state down into SortHeader and Paginator components?)
 
   const rows = processData(collection, columns, {
     search,
     filter,
-    page,
-    paginate: pagination,
+    page: pagination?.page,
+    paginate: pagination?.itemsPerPage,
     sort
   })
 
@@ -45,7 +41,7 @@ const Table = <T extends Entity>(
               <th
                 key={ col.name }
                 className={`${styles.tableCell} ${sort?.column === col.name ? `${styles.sort} ${styles[sort.direction || 'asc']}` : ''}`}
-                onClick={() => handleSortChange(col.name)}>{col.name}
+                onClick={() => setSortColumn(col.name)}>{col.name}
               </th>
             )}
           </tr>
@@ -76,43 +72,13 @@ const Table = <T extends Entity>(
         </tbody>
       </table>
       {
-        pagination &&
-        <div>
-          <span role="status" aria-live="polite">
-            { paginationInfoMessage(page, pagination, collection) }
-          </span>
-          <nav aria-label="Pagination Navigation">
-            <ul>
-              <select
-                id="per-page-select"
-                name="per-page-select"
-                onChange={ (e) => setPagination(parseInt(e.currentTarget.value)) }
-              >
-                { pagination < 10 && <option value={ pagination }>{ pagination }</option> }
-                <option value="10">10</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-              </select>
-              { pages > 6 &&
-                <li onClick={ () => setPage(page - 1) } aria-label='Go to previous page'>←</li>
-              }
-              { Array.from({ length: Math.min(pages, 6) }).map((_u, index: number) =>
-                <li
-                  key={ index }
-                  style={{ padding: '10px', backgroundColor: "#1A84FF", color: 'white', display: 'flex', gap: '16px' }}
-                  aria-label={ `Go to page ${index + 1}` }
-                  aria-current={ page === index }
-                  onClick={() => setPage(index)}
-                >
-                  { index + 1 }
-                </li>
-              )}
-              { pages > 6 &&
-                <li onClick={ () => setPage(page + 1) } aria-label='Go to next page'>→</li>
-              }
-            </ul>
-          </nav>
-        </div>
+        pagination && collection &&
+        <TablePaginator
+          pagination={ pagination }
+          setPage={ setPage }
+          setItemsPerPage={ setItemsPerPage }
+          collection={ collection }
+        />
       }
     </div>
   )
@@ -145,16 +111,6 @@ const determineValueSize = (node: ReactNode) => {
     return 'Md'
 
   return 'Lg'
-}
-
-const paginationInfoMessage = (currentPage: number, itemsPerPage: number, collection?: any[]): string => {
-  if (!collection)
-    return ''
-
-  const start = currentPage * itemsPerPage
-  const end = Math.min(collection.length, start + itemsPerPage)
-
-  return `Showing ${start + 1} to ${end} of ${collection.length} records`
 }
 
 export default Table

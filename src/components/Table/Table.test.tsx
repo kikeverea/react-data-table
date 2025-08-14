@@ -184,45 +184,6 @@ describe('Table', () => {
 
     describe('Pagination', () => {
 
-      test('without pagination, page numbers are not rendered', () => {
-        render(<Table collection={ collection } columns={ columns } />)
-
-        const paginationNavigation = screen.queryByLabelText('Pagination Navigation')
-        expect(paginationNavigation).toBeNull()
-      })
-
-      test('with pagination, render page numbers', () => {
-        render(<Table collection={ collection } columns={ columns } paginate={ 2 }/>)
-
-        const paginationNavigation = screen.getByLabelText('Pagination Navigation')
-        expect(paginationNavigation).toBeDefined()
-
-        const pageLinks = within(paginationNavigation).getAllByRole('listitem')
-        expect(pageLinks.length).toBe(2)
-
-        pageLinks.forEach((link, ind) => {
-          expect(link.textContent).toBe(`${ind + 1}`)
-        })
-      })
-
-      test('page numbers include aria-current for accessibility', () => {
-        render(<Table collection={ collection } columns={ columns } paginate={ 2 }/>)
-
-        const paginationNavigation = screen.getByLabelText('Pagination Navigation')
-        const pageLinks = within(paginationNavigation).getAllByRole('listitem')
-
-        expect(pageLinks[0].ariaCurrent).toBe('true')
-        expect(pageLinks[1].ariaCurrent).toBe('false')
-      })
-
-      test('with pagination, render pagination info', () => {
-        render(<Table collection={ longCollection } columns={ columns } paginate={ 2 }/>)
-
-        const paginationInfo = screen.getByRole('status')
-
-        expect(paginationInfo.textContent).toBe(`Showing 1 to 2 of ${longCollection.length} records`)
-      })
-
       test('paginates data', () => {
         render(<Table collection={ collection } columns={ columns } paginate={ 2 }/>)
 
@@ -238,20 +199,6 @@ describe('Table', () => {
         await userEvent.click(pageNumbers[1])
 
         expect(getNameCellsContent()).toEqual(['Lion', 'Sea Lion'])
-      })
-
-      test('if more than 6 pages, render navigation arrows', () => {
-        render(<Table collection={ longCollection } columns={ columns } paginate={ 1 }/>)
-
-        const paginationNavigation = screen.getByLabelText('Pagination Navigation')
-
-        const pageNumbers = within(paginationNavigation).getAllByRole('listitem')
-        const leftArrow = within(paginationNavigation).getByLabelText('Go to previous page')
-        const rightArrow = within(paginationNavigation).getByLabelText('Go to next page')
-
-        expect(pageNumbers.length - 2).toBe(6)
-        expect(leftArrow).toBeDefined()
-        expect(rightArrow).toBeDefined()
       })
 
       test('left arrow navigates to previous page', async () => {
@@ -278,16 +225,7 @@ describe('Table', () => {
         expect(getNameCellsContent()).toEqual([longCollection[expectedPage].name])
       })
 
-      test('has select for choosing items per page', () => {
-        render(<Table collection={ longCollection } columns={ columns } paginate={ 2 } />)
-
-        const paginationNavigation = screen.getByLabelText('Pagination Navigation')
-        const pageCountSelect = within(paginationNavigation).getByRole('combobox')
-
-        expect(pageCountSelect).toBeDefined()
-      })
-
-      test('has select for choosing items per page', async () => {
+      test('selecting items per page renders that amount of items', async () => {
         render(<Table collection={ longCollection } columns={ columns } paginate={ 2 } />)
 
         const paginationNavigation = screen.getByLabelText('Pagination Navigation')
