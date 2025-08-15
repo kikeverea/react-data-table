@@ -1,10 +1,12 @@
-import {isValidElement, ReactNode} from 'react'
-import { Entity, TableProps } from './types.ts'
-import { processData } from './dataProcessor.ts'
+import {isValidElement, ReactNode, useMemo} from 'react'
+import {Entity, TableProps, TableData} from './types.ts'
+import {mapToData, filterData} from './processors/dataProcessor.ts'
 import styles from './Table.module.css'
-import useSort from './useSort.ts'
-import usePagination from './usePagination.ts'
+import useSort from './hooks/useSort.ts'
+import usePagination from './hooks/usePagination.ts'
 import TablePaginator from '../TablePaginator/TablePaginator.tsx'
+import {sortAndPaginateData} from './processors/dataSortAndPaginate.ts'
+import {normalizeObjectsKeys} from '../util.ts'
 
 const Table = <T extends Entity>(
 {
@@ -18,29 +20,31 @@ const Table = <T extends Entity>(
   noEntriesMessage,
 }: TableProps<T>) => {
 
+  const tableData = useMemo<TableData>(
+    () => mapToData(collection, columns),
+    [collection, columns]
+  )
+
+  const filteredData = useMemo<TableData>(
+    () => filterData(tableData, { search, filter }),
+    [tableData, search, filter]
+  )
+
   const [sort, setSortColumn] = useSort(sortBy)
   const [pagination, setItemsPerPage, setPage] = usePagination(paginate, currentPage || 0)
 
-  // TODO: memoize mapped data (call on column.data)
-  // TODO: memoize filtered and searched data, then sort and paginate that data (maybe push state down into SortHeader and Paginator components?)
-
-  const rows = processData(collection, columns, {
-    search,
-    filter,
-    page: pagination?.page,
-    paginate: pagination?.itemsPerPage,
-    sort
-  })
+  const normalizedColumns = normalizeObjectsKeys(columns)
+  const rows = sortAndPaginateData(filteredData, { pagination, sort })
 
   return (
     <div className={ styles.tableResponsive }>
       <table className={ styles.table }>
         <thead className={ styles.tableHeader }>
           <tr className={ styles.tableRow }>
-            { columns.map(col =>
+            { normalizedColumns.map(col =>
               <th
                 key={ col.name }
-                className={`${styles.tableCell} ${sort?.column === col.name ? `${styles.sort} ${styles[sort.direction || 'asc']}` : ''}`}
+                className={`${styles.tableCell} ${sort?.column === col.name ? `${styles.sort} ${styles[sort?.direction || 'asc']}` : ''}`}
                 onClick={() => setSortColumn(col.name)}>{col.name}
               </th>
             )}
@@ -50,9 +54,10 @@ const Table = <T extends Entity>(
           { rows?.length
             ? rows.map(item =>
               <tr key={ item.id } className={ styles.tableRow }>
-                { columns.map(column => {
-                  const data = column.data(item)
-                  const displayValue = column.presenter ? column.presenter(data) : String(data)
+                { normalizedColumns.map(column => {
+
+                  const data = item.data[column.name.toLowerCase()]
+                  const displayValue = data.presenter ? data.presenter(data.value) : String(data.value)
                   const valueSize = determineValueSize(displayValue)
 
                   return (

@@ -1,4 +1,5 @@
 import {screen, within} from '@testing-library/react'
+import {TableData} from './Table/types.ts'
 
 export type TestData = {
   id: number,
@@ -64,4 +65,18 @@ export const getNameCellsContent = (rows: HTMLElement[]=dataRows()) => {
 
   return rows.map(row =>
     within(row).getAllByRole('cell')[nameCellIndex].textContent)
+}
+
+export const names = (data: TableData): string[] => data.map(item => item.data['name'].value as string)
+
+export const get = (collection: TestData[], ...names: string[]): string[] => {
+  return names.reduce((items, name) => {
+      const item = collection.find(item => item.name.toLowerCase() === name.toLowerCase())
+
+      if (!item)
+        throw new Error(`Test error!: No item found with name'${name}'`)
+
+      return item ? [ ...items, item.name ] : items
+    },
+    [] as string[])
 }

@@ -38,12 +38,12 @@ export const buildFilterStructure =
 
     if (isRangeColumn(column)) {
       const [columnName] = column
-      filter[columnName] = extractRangeFilter(column)
+      filter[columnName.toLowerCase()] = extractRangeFilter(column)
     }
     else {
       // noinspection UnnecessaryLocalVariableJS
       const columnName = column
-      filter[columnName] = extractCheckboxesFilter(column, collection)
+      filter[columnName.toLowerCase()] = extractCheckboxesFilter(column, collection)
     }
 
     return filter

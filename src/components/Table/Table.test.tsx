@@ -74,6 +74,7 @@ describe('Table', () => {
 
       rows.slice(1).forEach((row, rowIndex) => {
         const cells = within(row).getAllByRole('cell')
+
         cells.forEach((cell, colIndex) => {
           expect(cell.textContent).toBe(getTestData({ collection, row: rowIndex, col: colIndex }))
         })

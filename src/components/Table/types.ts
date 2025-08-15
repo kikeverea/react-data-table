@@ -10,6 +10,14 @@ export type TableColumn<T extends Entity> = {
   presenter?: (value: any) => ReactNode,
 }
 
+export type TableData = RowData[]
+
+export type RowData = Entity & { data: ItemData }
+
+export type ItemData = {
+  [column: string]: { value: Primitive | Primitive[], presenter?: (value: any) => ReactNode }
+}
+
 export type TableProps<T extends Entity> = {
   collection?: T[]
   columns: TableColumn<T>[],

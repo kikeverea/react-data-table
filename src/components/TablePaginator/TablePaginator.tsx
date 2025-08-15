@@ -1,8 +1,9 @@
 import {Entity} from '../Table/types.ts'
 import {Dispatch} from 'react'
+import {Pagination} from './types.ts'
 
 type TablePaginatorProps<T> = {
-  pagination: { page?: number, itemsPerPage: number },
+  pagination: Pagination,
   collection: T[],
   setPage: Dispatch<number>,
   setItemsPerPage: Dispatch<number>

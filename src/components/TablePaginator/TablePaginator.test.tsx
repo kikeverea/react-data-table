@@ -23,7 +23,7 @@ describe("Paginator", () => {
     setItemsPerPageMock.mockClear()
   })
 
-  const renderPaginator = (args: { itemsPerPage: number, page?: number }) => {
+  const renderPaginator = (args: Pagination) => {
     render(
       <TablePaginator
         collection={ collection }

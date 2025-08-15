@@ -72,7 +72,7 @@ const TableFilter = ({ filterStructure, filter={}, dispatchFilterChange, onClose
                             type='checkbox'
                             name={ valueName.toLowerCase() }
                             className={ styles.checkboxInput }
-                            checked={ !!filterValues && isInValues(valueName, filterValues as string[]) }
+                            checked={ filterValues && isInValues(valueName, filterValues as string[]) }
                             onChange={ e => handleFilterValueChanged(e, columnName, valueName) }
                           />
                           <span className={ styles.checkboxBox } aria-hidden="true"></span>
@@ -104,7 +104,8 @@ const getRangeLimit = (range: FilterRange, limit: 'min'|'max'): string => {
   return rangeLimit ? String(rangeLimit) : ''
 }
 
-const isInValues = (value: string, values: string[]): boolean =>
-  values.includes(value)
+const isInValues = (value: string, values: string[]): boolean => {
+  return values.includes(value)
+}
 
 export default TableFilter

@@ -1,5 +1,5 @@
 import {useState} from 'react'
-import {TableSort} from './types.ts'
+import {TableSort} from '../types.ts'
 
 type SortState = readonly [TableSort | undefined, (headerName: string) => void]
 
