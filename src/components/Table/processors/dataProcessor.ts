@@ -1,7 +1,6 @@
 import {Entity, Primitive, TableColumn, ItemData, TableData } from '../types.ts'
 import { FilterRange, TableFilter } from '../../TableFilter/types.ts'
 import {isBoolean, isString} from '../../types.ts'
-import {normalizeObjectKeys} from '../../util.ts'
 
 type FilterDataArgs = {
   search?: string,
@@ -35,7 +34,7 @@ const applySearchAndFilter = (
   let passesFilter = true
   let passesSearch = !search
 
-  const normalizedFilter = filter && normalizeObjectKeys(filter)
+  const normalizedFilter = filter && normalizeFilter(filter)
 
   for (const [column, { value }] of Object.entries(item)) {
     passesFilter = !filter || (passesFilter && evaluateFilter(normalizedFilter, column, value))
@@ -115,5 +114,22 @@ const asNumber = (value: string | number | undefined): number | null => {
 
   return value
 }
+
 const numberPresent = (value: number | null): value is number =>
   value !== undefined && value !== null && String(value).trim() !== ''
+
+export const normalizeFilter = (filter: TableFilter): TableFilter => {
+  if (!filter)
+    return filter
+
+  return Object
+    .entries(filter)
+    .reduce(
+      (normalized: TableFilter, [ key, value ]: [string, any]): TableFilter =>
+        ({
+          ...normalized,
+          [key.toLowerCase()]: value
+        }),
+      {}
+    )
+}

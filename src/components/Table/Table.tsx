@@ -6,7 +6,7 @@ import useSort from './hooks/useSort.ts'
 import usePagination from './hooks/usePagination.ts'
 import TablePaginator from '../TablePaginator/TablePaginator.tsx'
 import {sortAndPaginateData} from './processors/dataSortAndPaginate.ts'
-import {normalizeObjectsKeys} from '../util.ts'
+import SortingHeader from '../SortingHeader/SortingHeader.tsx'
 
 const Table = <T extends Entity>(
 {
@@ -33,28 +33,21 @@ const Table = <T extends Entity>(
   const [sort, setSortColumn] = useSort(sortBy)
   const [pagination, setItemsPerPage, setPage] = usePagination(paginate, currentPage || 0)
 
-  const normalizedColumns = normalizeObjectsKeys(columns)
   const rows = sortAndPaginateData(filteredData, { pagination, sort })
 
   return (
     <div className={ styles.tableResponsive }>
       <table className={ styles.table }>
-        <thead className={ styles.tableHeader }>
-          <tr className={ styles.tableRow }>
-            { normalizedColumns.map(col =>
-              <th
-                key={ col.name }
-                className={`${styles.tableCell} ${sort?.column === col.name ? `${styles.sort} ${styles[sort?.direction || 'asc']}` : ''}`}
-                onClick={() => setSortColumn(col.name)}>{col.name}
-              </th>
-            )}
-          </tr>
-        </thead>
+        <SortingHeader
+          columns={ columns }
+          sort={ sort }
+          setSortColumn={ setSortColumn }
+        />
         <tbody className={ styles.tableBody }>
           { rows?.length
             ? rows.map(item =>
               <tr key={ item.id } className={ styles.tableRow }>
-                { normalizedColumns.map(column => {
+                { columns.map(column => {
 
                   const data = item.data[column.name.toLowerCase()]
                   const displayValue = data.presenter ? data.presenter(data.value) : String(data.value)
