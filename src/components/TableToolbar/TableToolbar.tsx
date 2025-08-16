@@ -29,7 +29,7 @@ const TableToolbar = (
           <input
             type='text'
             className={ styles.searchbar }
-            onInput={ e => onSearchChange(e.currentTarget.value) }
+            onChange={ e => onSearchChange(e.currentTarget.value) }
             aria-label='table search'
             placeholder={ searchPlaceholder || 'Search' }
           />

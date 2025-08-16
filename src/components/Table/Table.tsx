@@ -50,7 +50,7 @@ const Table = <T extends Entity>(
                 { columns.map(column => {
 
                   const data = item.data[column.name.toLowerCase()]
-                  const displayValue = data.presenter ? data.presenter(data.value) : String(data.value)
+                  const displayValue = data.presenter ? data.presenter(data.value) : String(data.value ?? '-')
                   const valueSize = determineValueSize(displayValue)
 
                   return (
