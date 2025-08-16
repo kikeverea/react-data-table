@@ -20,7 +20,7 @@ const TableToolbar = (
   const [showFilter, setShowFilter] = useState<boolean>(false)
   const filterStructure = useFilterStructure(filterColumns, collection)
 
-  const hasStructure = filterStructure && Object.keys(filterStructure).length
+  const hasFilterStructure = filterStructure && Object.keys(filterStructure).length
 
   return (
     <div className={ styles.toolbar }>
@@ -36,7 +36,7 @@ const TableToolbar = (
           <SearchIcon className={ styles.searchbarIcon } />
         </div>
       }
-      { !!hasStructure &&
+      { !!hasFilterStructure &&
         <div className={ styles.filterContainer }>
 
           { showFilter &&

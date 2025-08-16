@@ -41,7 +41,9 @@ const TableFilter = ({ filterStructure, filter={}, dispatchFilterChange, onClose
               { isRange(value)
                   ? <div className={ styles.rangesContainer }>
                       <div>
-                        <label htmlFor={ `${columnName.toLowerCase()}-min` }>Min</label>
+                        <label htmlFor={ `${columnName.toLowerCase()}-min` }>
+                          Min
+                        </label>
                         <input
                           type="text"
                           id={`${columnName.toLowerCase()}-min`}
@@ -53,7 +55,9 @@ const TableFilter = ({ filterStructure, filter={}, dispatchFilterChange, onClose
                         />
                       </div>
                       <div>
-                        <label htmlFor={ `${columnName.toLowerCase()}-max` }>Max</label>
+                        <label htmlFor={ `${columnName.toLowerCase()}-max` }>
+                          Max
+                        </label>
                         <input
                           type="text"
                           id={`${columnName.toLowerCase()}-max`}
