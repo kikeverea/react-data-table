@@ -1,4 +1,4 @@
-import { buildFilterStructure } from './useFilterStructure.ts'
+import buildFilterStructure from './buildFilterStructure.ts'
 import {TestData} from '../testUtils.ts'
 import {FilterColumns} from './types.ts'
 import {FilterStructure} from '../TableFilter/types.ts'
@@ -26,7 +26,7 @@ test('creates a correct filter structure', () => {
     'birth': { range: true, parser },
   }
 
-  const filter = buildFilterStructure(columns, collection)
+  const filter = buildFilterStructure({ columns, collection })
 
   expect(Object.keys(filter)).toHaveLength(Object.keys(expected).length)
   expect(filter).toEqual(expected)
