@@ -1,6 +1,7 @@
 import {Entity, Primitive, TableColumn, ItemData, TableData } from '../types.ts'
-import { FilterRange, TableFilter } from '../../TableFilter/types.ts'
+import {CheckboxesFilter, isRange, RangeFilter, TableFilter} from '../../TableFilter/types.ts'
 import {isBoolean, isString} from '../../types.ts'
+import {normalized, normalizedValue} from '../../util.ts'
 
 type FilterDataArgs = {
   search?: string,
@@ -8,18 +9,23 @@ type FilterDataArgs = {
 }
 
 export const mapToData = <T extends Entity>(collection: T[] = [], columns: TableColumn<T>[]): TableData => {
+
   return collection.map(item => {
-    const data = columns.reduce((data, column) => ({ ...data, ...extractItemData(item, column) }), {} as ItemData)
+
+    const data = columns.reduce((data, column) => {
+      const columnName = normalized(column.name)
+      data[columnName] = { value: column.data(item), presenter: column.presenter }
+
+      return data
+    }, {} as ItemData)
 
     return { id: item.id, data }
   })
 }
 
-const extractItemData = <T extends Entity>(item: T, column: TableColumn<T>): ItemData =>
-  ({ [column.name.toLowerCase()]: { value: column.data(item), presenter: column.presenter }})
-
 export const filterData = (collection: TableData = [], args: FilterDataArgs): TableData => {
-  return collection.filter(item => applySearchAndFilter(item.data, args.search, args.filter))
+  const normalizedFilter = args.filter && normalizeFilter(args.filter)
+  return collection.filter(item => applySearchAndFilter(item.data, args.search, normalizedFilter))
 }
 
 const applySearchAndFilter = (
@@ -34,10 +40,8 @@ const applySearchAndFilter = (
   let passesFilter = true
   let passesSearch = !search
 
-  const normalizedFilter = filter && normalizeFilter(filter)
-
   for (const [column, { value }] of Object.entries(item)) {
-    passesFilter = !filter || (passesFilter && evaluateFilter(normalizedFilter, column, value))
+    passesFilter = !filter || (passesFilter && evaluateFilter(filter, column, value))
     passesSearch = !search || passesSearch || evaluateSearch(search, value)
   }
 
@@ -45,7 +49,7 @@ const applySearchAndFilter = (
 }
 
 const evaluateSearch = (search: string, value: Primitive | Primitive[]) => {
-  return String(value).toLowerCase().includes(search.toLowerCase())
+  return normalizedValue(value).includes(normalized(search))
 }
 
 const evaluateFilter = (filter: TableFilter | undefined, columnName: string, value: Primitive | Primitive[]): boolean => {
@@ -62,17 +66,18 @@ const evaluateFilterWithValue = (filter: TableFilter | undefined, columnName: st
   if (!columnFilter)
     return true
 
-  const isRange = !Array.isArray(columnFilter)
+  const filterIsRange = isRange(columnFilter)
 
-  return isRange
+  return filterIsRange
     ? evaluateRangeFilter(columnFilter, value)
-    : evaluateCompoundFilter(columnFilter, value)
+    : evaluateCheckboxesFilter(columnFilter, value)
 }
 
-const evaluateRangeFilter = (filter: FilterRange, primitiveValue: Primitive): boolean => {
+const evaluateRangeFilter = (filter: RangeFilter, primitiveValue: Primitive): boolean => {
   const value = asNumber(primitiveValue)
+  const hasLimits = 'min' in filter || 'max' in filter
 
-  if (!value)
+  if (!value || !hasLimits)
     return true
 
   const parser = filter.parser
@@ -95,11 +100,16 @@ const evaluateRangeFilter = (filter: FilterRange, primitiveValue: Primitive): bo
   else return true
 }
 
-const evaluateCompoundFilter = (filter: string[], value: Primitive): boolean => {
-  return (
-    !filter?.length ||
-    filter.some(filterValue => String(value).toLowerCase().includes(filterValue.toLowerCase()))
-  )
+const evaluateCheckboxesFilter = (filter: CheckboxesFilter, value: Primitive): boolean => {
+  const checked = filter.checked
+
+  if (!checked.length)
+    return true
+
+  if (typeof value !== 'string')
+    throw new Error('checkbox filter column names must be strings')
+
+  return checked.some((checked) => checked === normalized(value))
 }
 
 const asNumber = (value: string | number | undefined): number | null => {
@@ -119,17 +129,13 @@ const numberPresent = (value: number | null): value is number =>
   value !== undefined && value !== null && String(value).trim() !== ''
 
 export const normalizeFilter = (filter: TableFilter): TableFilter => {
-  if (!filter)
-    return filter
-
   return Object
     .entries(filter)
     .reduce(
-      (normalized: TableFilter, [ key, value ]: [string, any]): TableFilter =>
-        ({
-          ...normalized,
-          [key.toLowerCase()]: value
-        }),
+      (normalizedFilter: TableFilter, [ key, value ]: [string, any]): TableFilter => {
+        normalizedFilter[normalized(key)] = value
+        return normalizedFilter
+      },
       {}
     )
 }

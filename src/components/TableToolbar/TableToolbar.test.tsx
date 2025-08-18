@@ -1,7 +1,8 @@
 import {render, screen, within} from '@testing-library/react'
 import TableToolbar from './TableToolbar.tsx'
-import { TestData } from '../testUtils.ts'
+import {defaultCollection, defaultFilterColumns, TestData} from '../testUtils.ts'
 import userEvent from '@testing-library/user-event'
+import {buildFilter} from './filterBuilder.ts'
 
 describe('Table Toolbar', () => {
 
@@ -45,6 +46,8 @@ describe('Table Toolbar', () => {
       { id: 2, name: 'Dog', family: 'Canine', type: 'Pet', age: 5, birth: '2020-07-14' }
     ]
 
+    const tableFilter = buildFilter({ columns: defaultFilterColumns, collection: defaultCollection })
+
     test("Doesn't show filter if no columns given", () => {
       render(<TableToolbar collection={[]}/>)
 
@@ -60,14 +63,14 @@ describe('Table Toolbar', () => {
     })
 
     test("Renders show filter button", () => {
-      render(<TableToolbar filterColumns={['family', 'type']} collection={ collection } />)
+      render(<TableToolbar filter={ tableFilter } collection={ collection } />)
 
       const showFilterButton = screen.getByLabelText('show filter')
       expect(showFilterButton).toBeDefined()
     })
 
     test('Displays filter', async () => {
-      render(<TableToolbar filterColumns={['family', 'type']} collection={ collection } />)
+      render(<TableToolbar filter={ tableFilter } collection={ collection } />)
 
       const filterThen = screen.queryByRole('dialog')
       expect(filterThen).toBe(null)
@@ -80,7 +83,7 @@ describe('Table Toolbar', () => {
     })
 
     test('Hides filter', async () => {
-      render(<TableToolbar filterColumns={['family', 'type']} collection={ collection } />)
+      render(<TableToolbar filter={ tableFilter } collection={ collection } />)
 
       const showFilterButton = screen.getByLabelText('show filter')
 
@@ -94,7 +97,7 @@ describe('Table Toolbar', () => {
     })
 
     test('Hides filter by clicking its close button', async () => {
-      render(<TableToolbar filterColumns={['family', 'type']} collection={ collection } />)
+      render(<TableToolbar filter={ tableFilter } collection={ collection } />)
 
       const showFilterButton = screen.getByLabelText('show filter')
       await userEvent.click(showFilterButton)

@@ -1,5 +1,6 @@
 import {useState} from 'react'
 import {TableSort} from '../types.ts'
+import {normalized} from '../../util.ts'
 
 type SortState = readonly [TableSort | undefined, (headerName: string) => void]
 
@@ -13,7 +14,7 @@ const useSort = (initialSort: TableSort | undefined): SortState => {
       return
     }
 
-    const isSameColumn = sort.column.toLowerCase() === headerName.toLowerCase()
+    const isSameColumn = normalized(sort.column) === normalized(headerName)
 
     const direction = isSameColumn
       ? (sort.direction || 'asc') === 'asc' ? 'desc' : 'asc'

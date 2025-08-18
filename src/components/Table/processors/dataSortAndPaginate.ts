@@ -1,6 +1,7 @@
 import {ItemData, TableData, TableSort} from '../types.ts'
 import {isBoolean, isNumber, isString} from '../../types.ts'
 import {Pagination} from '../../TablePaginator/types.ts'
+import {normalized} from '../../util.ts'
 
 type SortAndPaginateDataArgs = {
   pagination?: Pagination,
@@ -30,7 +31,7 @@ const applySort = (
   if (!sort)
     return 0
 
-  const column = sort.column.toLowerCase()
+  const column = normalized(sort.column)
 
   const value1 = item1[column].value
   const value2 = item2[column].value

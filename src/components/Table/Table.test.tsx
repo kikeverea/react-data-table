@@ -2,6 +2,7 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Table from './Table.tsx'
 import { TableColumn } from './types.ts'
+import {FilterColumns} from '../TableToolbar/types.ts'
 
 import {
   formatDate,
@@ -9,7 +10,7 @@ import {
   getNameCellsContent,
   TestData,
   parseDate,
-  getTestData
+  getTestData, UpdateFilterArgs, newFilter
 } from '../testUtils.ts'
 
 describe('Table', () => {
@@ -38,6 +39,9 @@ describe('Table', () => {
     { id: 6, name: 'Gold Fish', family: 'Fish', type: 'Pet', age: 3, birth: '2022-11-16' },
     { id: 7, name: 'Monkey', family: 'Primate', type: 'Wild', age: 5, birth: '2020-01-08' },
   ]
+
+  const filterColumns: FilterColumns = [ 'Family', 'Type', ['Age', 'range'], ['Birth', 'range', parseDate] ]
+  const filterAnd = (args?: UpdateFilterArgs) => newFilter(filterColumns, args, longCollection)
 
   describe('Without data', () => {
     test('renders header', () => {
@@ -98,59 +102,85 @@ describe('Table', () => {
     describe('Filter', () => {
 
       test('renders rows that pass the filter', () => {
-        render(<Table collection={ longCollection } columns={ columns } filter={{
-            'Family': ['feline', 'canine'],
-            'Type': ['wild'],
-          }}
+        render(<Table collection={ longCollection } columns={ columns } filter={
+          filterAnd({
+            'family': ['feline', 'canine' ],
+            'type': ['wild', 'canine' ],
+          })}
         />)
 
         expect(getNameCellsContent()).toEqual(['Lion', 'Red Fox'])
       })
 
       test('renders rows that pass the filter and search', () => {
-        render(<Table collection={ collection } columns={ columns } search='cat' filter={{ 'Family': ['feline'] }} />)
+        render(<Table collection={ collection } columns={ columns } search='cat' filter={
+          filterAnd({
+            'family': ['feline' ],
+          })}
+        />)
 
         expect(getNameCellsContent()).toEqual(['Cat'])
       })
 
       test('renders rows that pass the range filter', () => {
-        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 8, max: 15 } }} />)
+        render(<Table collection={ collection } columns={ columns } filter={
+          filterAnd({
+            'age': { min: 8, max: 15 },
+          })}
+        />)
 
         expect(getNameCellsContent()).toEqual(['Cat', 'Lion'])
       })
 
       test('renders rows that pass the range filter, edge cases', () => {
-        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 10, max: 13 } }} />)
+        render(<Table collection={ collection } columns={ columns }filter={
+          filterAnd({
+            'age': { min: 10, max: 13 },
+          })}
+        />)
 
         expect(getNameCellsContent()).toEqual(['Cat', 'Lion'])
       })
 
       test('renders rows that pass a min range filter', () => {
-        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { min: 12 } }} />)
+        render(<Table collection={ collection } columns={ columns } filter={
+          filterAnd({
+            'age': { min: 12 },
+          })}
+        />)
 
         expect(getNameCellsContent()).toEqual(['Lion', 'Sea Lion'])
       })
 
       test.each([
-        { 'Age': { min: 18 } },
-        { 'Age': { max: 2 } },
-        { 'Age': { min: 18, max: 20 } },
-        { 'Family': ['feline'], 'Name': ['dog'] }
+        { 'age': { min: 18 } } as UpdateFilterArgs,
+        { 'age': { max: 2 } },
+        { 'age': { min: 18, max: 20 } },
+        { 'family': ['primate'], 'type': ['pet'] }
       ])
-      ('renders empty message if no row passes the filter', noPassFilter => {
-        render(<Table collection={ collection } columns={ columns } filter={ noPassFilter as { [column: string]: any } } />)
+      ('renders empty message if no row passes the filter', (noPassFilter) => {
+
+        render(<Table collection={ collection } columns={ columns } filter={ filterAnd(noPassFilter) } />)
 
         expect(getNameCellsContent()).toEqual(['No data available'])
       })
 
       test('renders empty message if no row passes the filter and search', () => {
-        render(<Table collection={ collection } columns={ columns } search='dog' filter={{ 'Family': ['feline'] }} />)
+        render(<Table collection={ collection } columns={ columns } search='dog' filter={
+          filterAnd({
+            'family': ['feline' ],
+          })}
+        />)
 
         expect(getNameCellsContent()).toEqual(['No data available'])
       })
 
       test('renders rows that pass the max range filter', () => {
-        render(<Table collection={ collection } columns={ columns } filter={{ 'Age': { max: 12 } }} />)
+        render(<Table collection={ collection } columns={ columns } filter={
+          filterAnd({
+            'age': { max: 12 },
+          })}
+        />)
 
         expect(getNameCellsContent()).toEqual(['Cat', 'Dog'])
       })
@@ -160,12 +190,14 @@ describe('Table', () => {
           <Table
             collection={ collection }
             columns={ columns }
-            filter={{
-              'Birth': {
-                min: '2012-07-14',
-                max: '2015-07-14',
-                parser: parseDate
-              }}}
+            filter={
+              filterAnd({
+                'birth': {
+                  min: '2012-07-14',
+                  max: '2015-07-14',
+                  parser: parseDate
+                },
+              })}
           />)
 
         expect(getNameCellsContent()).toEqual(['Cat', 'Lion'])
@@ -175,8 +207,11 @@ describe('Table', () => {
         render(<Table
           collection={ collection }
           columns={ columns }
-          filter={{ 'Age': { min: 8, max: 16 }, 'Family': ['feline'] }}
           search='Lion'
+          filter={
+            filterAnd({
+              'age': { min: 8, max: 16 }, 'family': ['feline']
+            })}
         />)
 
         expect(getNameCellsContent()).toEqual(['Lion'])
@@ -293,7 +328,7 @@ describe('Table', () => {
         render(<Table
           collection={ collection }
           columns={ columns }
-          filter={{ 'Age': { min: 8, max: 16 } }}
+          filter={ filterAnd({ 'age': { min: 8, max: 16 } })}
           search='Lion'
           sortBy={{ column: 'name', direction: 'desc' }}
         />)

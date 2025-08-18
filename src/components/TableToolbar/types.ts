@@ -2,9 +2,9 @@ import {FilterAction, FilterParser, TableFilter} from '../TableFilter/types.ts'
 import {Dispatch} from 'react'
 import {Dictionary} from '../types.ts'
 
-export type RangeFilter = [string, 'range', FilterParser?]
+export type RangeFilterColumn = [string, 'range', FilterParser?]
 
-export type FilterColumns = (string | RangeFilter)[]
+export type FilterColumns = (string | RangeFilterColumn)[]
 
 export type TableToolbarProps = {
   collection?: Dictionary<string|number>[]

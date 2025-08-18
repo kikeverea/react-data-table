@@ -4,6 +4,7 @@ import TableToolbar from '../TableToolbar/TableToolbar.tsx'
 import Table from '../Table/Table.tsx'
 import filterReducer from '../TableFilter/filterReducer.ts'
 import {FilterColumns} from '../TableToolbar/types.ts'
+import { buildFilter } from '../TableToolbar/filterBuilder.ts'
 
 export type DataTableProps<T extends Entity> = {
   collection?: T[]
@@ -26,15 +27,18 @@ const DataTable = <T extends Entity> (
   noEntriesMessage,
 }: DataTableProps<T>) => {
 
-  const [filter, dispatch] = useReducer(filterReducer, {})
+  const [filter, dispatch] = useReducer(
+    filterReducer,
+    undefined,
+    () => filterColumns && collection ? buildFilter({ columns: filterColumns, collection }) : {}
+  )
+
   const [search, setSearch] = useState<string>('')
 
   return (
     <>
       { (showSearch || filter?.length) &&
         <TableToolbar
-          collection={ collection }
-          filterColumns={ filterColumns }
           showSearch={ showSearch }
           onSearchChange={ setSearch }
           filter={ filter }

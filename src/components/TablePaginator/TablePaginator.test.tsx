@@ -2,6 +2,7 @@ import {render, screen, within} from '@testing-library/react'
 import {TestData} from '../testUtils.ts'
 import TablePaginator from './TablePaginator.tsx'
 import userEvent from '@testing-library/user-event'
+import {Pagination} from './types.ts'
 
 const collection: TestData[] = [
   { id: 1, name: 'Cat', family: 'Feline', type: 'Pet', age: 10, birth: '2015-07-14' },

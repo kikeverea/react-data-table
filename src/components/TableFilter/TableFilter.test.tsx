@@ -1,18 +1,12 @@
 import {render, screen, within} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import TableFilter from './TableFilter.tsx'
-import { FilterStructure } from './types.ts'
+import {buildFilter} from '../TableToolbar/filterBuilder.ts'
+import {defaultCollection, defaultFilterColumns} from '../testUtils.ts'
 
 describe('Table Filter', () => {
 
-  const parser = (date: string) => new Date(date).getTime()
-
-  const filterStructure: FilterStructure = {
-    'Family': ['Feline', 'Canine', 'Seals', 'Fish', 'Primate'],
-    'Type': ['Pet', 'Wild',],
-    'Age': { range: true },
-    'Birth': { range: true, parser: parser }
-  }
+  const filter = buildFilter({ columns: defaultFilterColumns, collection: defaultCollection })
 
   const dispatchFilterChangeMock = vi.fn()
   const onCloseFilterMock = vi.fn()
@@ -20,8 +14,7 @@ describe('Table Filter', () => {
   beforeEach(() => {
     render(
       <TableFilter
-        filterStructure={ filterStructure }
-        filter={{}}
+        filter={ filter }
         dispatchFilterChange={ dispatchFilterChangeMock }
         onCloseFilter={ onCloseFilterMock }
       />)
@@ -41,11 +34,11 @@ describe('Table Filter', () => {
   })
 
   test('renders all filter labels', () => {
-    const family = screen.getAllByLabelText('Family')
 
-    const type = screen.getByLabelText('Type')
-    const age = screen.getByLabelText('Age')
-    const birth = screen.getByLabelText('Birth')
+    const family = screen.getByLabelText('family')
+    const type = screen.getByLabelText('type')
+    const age = screen.getByLabelText('age')
+    const birth = screen.getByLabelText('birth')
 
     expect(family).toBeDefined()
     expect(type).toBeDefined()
@@ -80,26 +73,26 @@ describe('Table Filter', () => {
 
     expect(dispatchFilterChangeMock).toHaveBeenCalledWith({
       type: 'TOGGLE_COLUMN',
-      payload: { column: 'Family', value: 'Feline', selected: true },
+      payload: { column: 'family', value: 'feline', selected: true },
     })
 
     expect(dispatchFilterChangeMock).toHaveBeenCalledTimes(1)
   })
 
   test('input in a number range calls the handler with the column name and range value', async () => {
-    const age = screen.getByRole('group', { name: 'Age' })
+    const age = screen.getByRole('group', { name: 'age' })
     const [min, max] = within(age).getAllByRole('textbox') as HTMLInputElement[]
 
     await userEvent.type(min, '1')
     expect(dispatchFilterChangeMock).toHaveBeenLastCalledWith({
       type: 'SET_COLUMN_RANGE',
-      payload: { column: 'Age', value: '1', target: 'min', parser: undefined },
+      payload: { column: 'age', value: '1', target: 'min' },
     })
 
     await userEvent.type(max, '1')
     expect(dispatchFilterChangeMock).toHaveBeenLastCalledWith({
       type: 'SET_COLUMN_RANGE',
-      payload: { column: 'Age', value: '1', target: 'max', parser: undefined },
+      payload: { column: 'age', value: '1', target: 'max', parser: undefined },
     })
 
     expect(dispatchFilterChangeMock).toHaveBeenCalledTimes(2)

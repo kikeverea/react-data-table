@@ -7,6 +7,7 @@ import usePagination from './hooks/usePagination.ts'
 import TablePaginator from '../TablePaginator/TablePaginator.tsx'
 import {sortAndPaginateData} from './processors/dataSortAndPaginate.ts'
 import SortingHeader from '../SortingHeader/SortingHeader.tsx'
+import {normalized} from '../util.ts'
 
 const Table = <T extends Entity>(
 {
@@ -49,7 +50,7 @@ const Table = <T extends Entity>(
               <tr key={ item.id } className={ styles.tableRow }>
                 { columns.map(column => {
 
-                  const data = item.data[column.name.toLowerCase()]
+                  const data = item.data[normalized(column.name)]
                   const displayValue = data.presenter ? data.presenter(data.value) : String(data.value ?? '-')
                   const valueSize = determineValueSize(displayValue)
 

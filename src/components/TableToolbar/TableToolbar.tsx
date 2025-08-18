@@ -1,6 +1,5 @@
 import TableFilter from '../TableFilter/TableFilter.tsx'
-import buildFilterStructure from './buildFilterStructure.ts'
-import {useMemo, useState} from 'react'
+import {useState} from 'react'
 import styles from './TableToolbar.module.css'
 import SearchIcon from '../../assets/icons/search.svg?react'
 import FilterIcon from '../../assets/icons/filter.svg?react'
@@ -8,9 +7,7 @@ import {TableToolbarProps} from './types.ts'
 
 const TableToolbar = (
 {
-  collection,
-  filter={},
-  filterColumns,
+  filter,
   showSearch=true,
   searchPlaceholder,
   onSearchChange=() => {},
@@ -18,12 +15,6 @@ const TableToolbar = (
 }: TableToolbarProps) => {
 
   const [showFilter, setShowFilter] = useState<boolean>(false)
-  const filterStructure = useMemo(
-    () => buildFilterStructure({ columns: filterColumns, collection }),
-    [filterColumns, collection]
-  )
-
-  const hasFilterStructure = filterStructure && Object.keys(filterStructure).length
 
   return (
     <div className={ styles.toolbar }>
@@ -39,13 +30,11 @@ const TableToolbar = (
           <SearchIcon className={ styles.searchbarIcon } />
         </div>
       }
-      { !!hasFilterStructure &&
+      { filter &&
         <div className={ styles.filterContainer }>
-
           { showFilter &&
             <div className={styles.filter}>
               <TableFilter
-                filterStructure={ filterStructure }
                 filter={ filter }
                 dispatchFilterChange={ dispatchFilterChange }
                 onCloseFilter={ () => setShowFilter(false) }

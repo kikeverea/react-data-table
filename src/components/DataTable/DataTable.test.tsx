@@ -105,11 +105,12 @@ describe('Data Table', () => {
         const showFilterButton = screen.getByLabelText('show filter')
         await userEvent.click(showFilterButton)
 
-        const filterElement = screen.getByLabelText('table filter')
-        const familyParam = screen.getByText('Family')
-        const typeParam = screen.getByText('Type')
+        const filterDialog = screen.getByRole('dialog', { name: 'table filter' })
 
-        expect(filterElement).toBeInTheDocument()
+        const familyParam = within(filterDialog).getByLabelText('family')
+        const typeParam = within(filterDialog).getByLabelText('type')
+
+        expect(filterDialog).toBeInTheDocument()
         expect(familyParam).toBeInTheDocument()
         expect(typeParam).toBeInTheDocument()
       })

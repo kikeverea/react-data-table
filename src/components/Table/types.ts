@@ -1,13 +1,14 @@
 import { ReactNode } from 'react'
-import { TableFilter} from '../TableFilter/types.ts'
+import { TableFilter } from '../TableFilter/types.ts'
 
 export type Entity = { id: number | string }
 export type Primitive = string | number
+export type DataPresenter = (value: Primitive | Primitive[]) => ReactNode
 
 export type TableColumn<T extends Entity> = {
   name: string,
   data: (item: T) => Primitive | Primitive[],
-  presenter?: (value: any) => ReactNode,
+  presenter?: DataPresenter,
 }
 
 export type TableData = RowData[]
@@ -15,7 +16,7 @@ export type TableData = RowData[]
 export type RowData = Entity & { data: ItemData }
 
 export type ItemData = {
-  [column: string]: { value: Primitive | Primitive[], presenter?: (value: any) => ReactNode }
+  [column: string]: { value: Primitive | Primitive[], presenter?: DataPresenter }
 }
 
 export type TableProps<T extends Entity> = {

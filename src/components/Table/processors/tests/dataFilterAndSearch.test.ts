@@ -1,7 +1,8 @@
-import {formatDate, get, names, parseDate, TestData} from '../../../testUtils.ts'
+import {formatDate, get, names, parseDate, TestData, newFilter, UpdateFilterArgs} from '../../../testUtils.ts'
 import {filterData, mapToData} from '../dataProcessor.ts'
 import {TableColumn} from '../../types.ts'
 import {TableFilter} from '../../../TableFilter/types.ts'
+import {FilterColumns} from '../../../TableToolbar/types.ts'
 
 const raw: TestData[] = [
   { id: 1, name: 'Cat', family: 'Feline', type: 'Pet', age: 10, birth: '2015-07-14' },
@@ -21,7 +22,9 @@ const columns: TableColumn<TestData>[] = [
   { name: 'Birth', data: item => parseDate(item.birth), presenter: formatDate },
 ]
 
+
 const collection = mapToData(raw, columns)
+const filterColumns: FilterColumns = [ 'Family', 'Type', ['Age', 'range'], ['Birth', 'range', parseDate] ]
 
 describe('Data filter and search', () => {
 
@@ -45,72 +48,78 @@ describe('Data filter and search', () => {
 
   describe('Filter', () => {
 
+    let toFilter: (args: UpdateFilterArgs) => TableFilter
+
+    beforeEach(() => {
+      toFilter = (args: UpdateFilterArgs) => newFilter(filterColumns, args, raw)
+    })
+
     test('return items that pass the filter', () => {
-      const filter = {'Family': ['feline', 'canine'], 'Type': ['wild'] }
+      const filter = toFilter({ 'Family': ['feline', 'canine'], 'Type': ['wild'] })
 
       const data = filterData(collection, { filter })
       expect(names(data)).toEqual(get(raw, 'Lion', 'Red Fox'))
     })
 
     test('return empty array if no item passes the filter', () => {
-      const filter = {'Family': ['fish'], 'Type': ['wild'] }
+      const filter = toFilter({'Family': ['fish'], 'Type': ['wild'] })
 
       const data = filterData(collection, { filter })
       expect(names(data)).toHaveLength(0)
     })
 
     test('return items that pass the range filter', () => {
-      const filter: TableFilter = { 'Age': { min: 8, max: 15 } }
+      const filter: TableFilter = toFilter({ 'Age': { min: 8, max: 15 } })
 
       const data = filterData(collection, { filter })
       expect(names(data)).toEqual(get(raw, 'Cat', 'Lion'))
     })
 
     test('return items that pass the range filter, edge cases', () => {
-      const filter = { 'Age': { min: 10, max: 13 } }
+      const filter = toFilter({ 'Age': { min: 10, max: 13 } })
 
       const data = filterData(collection, { filter })
       expect(names(data)).toEqual(get(raw, 'Cat', 'Lion'))
     })
 
     test('return items that pass a min range filter', () => {
-      const filter = { 'Age': { min: 12 } }
+      const filter = toFilter({ 'Age': { min: 12 } })
 
       const data = filterData(collection, { filter })
       expect(names(data)).toEqual(get(raw, 'Lion', 'Sea Lion'))
     })
 
     test('return empty array if no item passes the range filter', () => {
-      const filter = { 'Age': { min: 13, max: 10 } }
+      const filter = toFilter({ 'Age': { min: 13, max: 10 } })
 
       const data = filterData(collection, { filter })
       expect(names(data)).toHaveLength(0)
     })
 
     test('return items that pass the max range filter', () => {
-      const filter = { 'Age': { max: 12 } }
+      const filter = toFilter({ 'Age': { max: 12 } })
 
       const data = filterData(collection, { filter })
       expect(names(data)).toEqual(get(raw, 'Cat', 'Dog', 'Red Fox', 'Gold Fish', 'Monkey'))
     })
 
     test('return items that pass a parsed range filter', () => {
-      const filter = {
+      const filter = toFilter({
         'Birth': {
             min: '2012-07-14',
             max: '2015-07-14',
             parser: (date: string) => new Date(date).getTime()
-        }}
+        }})
 
       const data = filterData(collection, { filter })
       expect(names(data)).toEqual(get(raw, 'Cat', 'Lion'))
     })
 
     test('return items that pass a range filter, filter and search', () => {
-      const filter = { 'Age': { min: 8, max: 16 }, 'Family': ['feline'] }
+      const filter = toFilter({ 'Age': { min: 8, max: 16 }, 'Family': ['feline'] })
       const search = 'Lion'
 
-      const data = filterData(collection, { filter, search})
+      const data = filterData(collection, { filter, search })
 
       expect(names(data)).toEqual(get(raw, 'Lion'))
     })
