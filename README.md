@@ -23,14 +23,6 @@ Designed to be:
 
 ---
 
-## 📦 Installation
-
-```bash
-npm install react-data-table
-```
-
----
-
 ## 🚀 Quick Start
 
 ```tsx
@@ -84,12 +76,6 @@ const columns = [
 
 All components are tested with [Testing Library](https://testing-library.com/).
 
-Run tests:
-
-```bash
-npm test
-```
-
 ---
 
 ## ♿ Accessibility
@@ -115,7 +101,6 @@ npm test
 ## 🔮 Roadmap
 
 - [ ] Export functionality (CSV/Excel).
-- [ ] Column resizing & reordering.
 - [ ] Dark mode / theming.
 - [ ] Virtualization mode (optional, future).
 
