@@ -1,4 +1,4 @@
-# React Data Table
+# React Data Table (Under construction! 🚧)
 
 A lightweight, dependency-free React table component with **search, filtering, sorting, and pagination** out of the box.
 
